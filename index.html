@@ -64,15 +64,17 @@
                 const body = await res.json()
                 
                 alert(`${body.message} - ${body.token}`)
-
+                copyToClipboard(body.token, 'verify-token');
             }
             
             // Verify 
             async function onVerify(e) {
+                console.log("onVerify");
                 e.preventDefault()
                 const user = await getUser()
-                const userid = user._id
-                const token = document.getElementById('token').value
+                const userId = user._id
+                console.log(`user Id: ${userId}`)
+                const token = document.getElementById('verify-token').value
 
                 const res = await fetch('/auth/local/verify', {
                     method: 'POST',
@@ -80,7 +82,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        userid,
+                        userId,
                         token,
                     }),
                     credentials: 'include',
@@ -107,6 +109,7 @@
                 })
                 const body = await res.json()
                 alert(`${body.message} - ${body.token}`)
+                copyToClipboard(body.token, 'resetpassword-token');
             }
 
             // Reset Password
@@ -205,6 +208,15 @@
                 user = body.user
                 render()
             }
+            
+            // copy data to the clipboard
+            function copyToClipboard(token, id) {
+               var copyText = document.getElementById(id);
+               copyText.value = token;
+               copyText.select();
+               document.execCommand("Copy");
+               //alert(`Copied the text: ${copyText.value}`);
+            }
 
             function render() {
                 if (user) {
@@ -223,7 +235,7 @@
                         <div>
                             <h2>Verify Token</h2>
                             <form onsubmit="onVerify(event)">
-                                <div><label>Token<input id="token" type="text"/></label></div>
+                                <div><label>Token<input id="verify-token" type="text"/></label></div>
                                 <button>VerifyToken</button>
                             </form>
                         </div>

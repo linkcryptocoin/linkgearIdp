@@ -51,8 +51,8 @@ const start = async () => {
             onGenerateVerificationToken({email, verificationToken}) {
                 console.log(`${email} requested a verification ${verificationToken}.`)
             },
-            onVerify({email}) {
-                console.log(`${email} verified their email`)
+            onVerify({email, _id}) {
+                console.log(`${_id} verified a generate-verification token`)
             },
             onForgotPassword({email, passwordResetToken, _id}) {
                 console.log(`${email}/${_id} forgot its password, here is the token: ${passwordResetToken}`)
