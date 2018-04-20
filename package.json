@@ -1,0 +1,24 @@
+{
+  "name": "minimal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nicola Marcacci Rossi <nicolamr@gmail.com> (http://nmr.io)",
+  "license": "MIT",
+  "dependencies": {
+    "bignumber": "^1.1.0",
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "mnid": "0.1.1",
+    "mongodb": "^3.0.1",
+    "ooth": "^1.1.0",
+    "ooth-local": "^1.1.0",
+    "ooth-mongo": "^1.1.0",
+    "web3": "0.19.1"
+  }
+}

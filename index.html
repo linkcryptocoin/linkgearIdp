@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            async function register(e) {
+                e.preventDefault()
+                const email = document.getElementById('register-email').value
+                const password = document.getElementById('register-password').value
+                const res = await fetch('/auth/local/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                if (body.status === 'error') {
+                    alert(body.message)
+                    return
+                }
+                await loginWithEmailPassword(email, password)
+            }
+
+            async function loginWithEmailPassword(username, password) {
+                const res = await fetch('/auth/local/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                if (body.status === 'error') {
+                    alert(body.message)
+                    return
+                }
+                user = body.user
+                render()
+            }
+           
+            // GenerateV Verification Token
+            async function onGenerateVerificationToken(e) {
+                //alert("onGeneareVerificationToken");
+                e.preventDefault()
+                const user = await getUser()
+                //alert("name: " + user.local.email);
+                const ouser = {_id: user._id, name: {email: user.local.email}}
+                const res = await fetch('/auth/local/generate-verification-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    user: ouser,
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                
+                alert(`${body.message} - ${body.token}`)
+
+            }
+            
+            // Verify 
+            async function onVerify(e) {
+                e.preventDefault()
+                const user = await getUser()
+                const userid = user._id
+                const token = document.getElementById('token').value
+
+                const res = await fetch('/auth/local/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userid,
+                        token,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(body.message) 
+            }
+
+            // Forgot Password
+            async function onForgotPassword(e) {
+                //alert("onForgotPassword");
+                e.preventDefault();
+                const username = document.getElementById('forgotpassword-email').value
+                //const res = await fetch('/auth/local/forgot-password', {
+                const res = await fetch('/auth/local/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} - ${body.token}`)
+            }
+
+            // Reset Password
+            async function onResetPassword(e) {
+                //alert("onResetPassword");
+                e.preventDefault();
+                const userId = document.getElementById('resetpassword-userid').value;
+                const token = document.getElementById('resetpassword-token').value
+                const newPassword = document.getElementById('resetpassword-password').value
+
+                alert(`userId=${userId}, token=${token} newPassword=${newPassword}`)
+                const res = await fetch('/auth/local/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        token,
+                        newPassword,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(body.message) 
+            }
+            
+            // Change password
+            async function onChangePassword(e) {
+                alert("onChangePassword");
+                e.preventDefault();
+                const user = await getUser()
+                const password = document.getElementById('changepassword-old').value;
+                const newPassword = document.getElementById('changepassword-new').value;
+
+                alert(`old=${password}, new=${newPassword}`)
+                const res = await fetch('/auth/local/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    user: {_id : user._id},
+                    body: JSON.stringify({
+                          password,
+                          newPassword,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(body.message) 
+            }
+
+            function login(e) {
+                e.preventDefault()
+                loginWithEmailPassword(
+                    document.getElementById('login-email').value,
+                    document.getElementById('login-password').value,
+                )
+            }
+
+            async function logout() {
+                const res = await fetch('/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                if (body.status === 'error') {
+                    alert(body.message)
+                    return
+                }
+                user = null
+                render()
+            }
+
+            async function getUser() {
+                const res = await fetch('/auth/status', {
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                if (body.status === 'error') {
+                    alert(body.message)
+                    return
+                }
+                return body.user
+            }
+
+            async function checkUser() {
+                const res = await fetch('/auth/status', {
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                if (body.status === 'error') {
+                    alert(body.message)
+                    return
+                }
+                user = body.user
+                render()
+            }
+
+            function render() {
+                if (user) {
+                    document.getElementById('app').innerHTML = `
+                        <h1>Linkgear Ooth Example - ${user.local.email} logged in</h1>
+                        <p> userId: ${user._id} </p>
+                        <p> linkgearAccount: ${user.local.account} </p>
+                        <hr>
+                        <div>
+                            <h2>Token Retrieval</h2>
+		            <form onsubmit="onGenerateVerificationToken(event)">
+			    <button>GenerateVerificationToken</button>
+                            </form>
+                        </div>
+                        <hr>
+                        <div>
+                            <h2>Verify Token</h2>
+                            <form onsubmit="onVerify(event)">
+                                <div><label>Token<input id="token" type="text"/></label></div>
+                                <button>VerifyToken</button>
+                            </form>
+                        </div>
+                        <hr>
+                        <div>
+                            <h2> Change Password </h2>
+                            <form onsubmit="onChangePassword(event)">
+                                <div><label>Old Password<input id="changepassword-old" type="password"/></label></div>
+                                <div><label>New Password<input id="changepassword-new" type="password"/></label></div>
+                                <button>ChangePassword</button>
+                            </form> 
+                        </div>
+                        <hr>
+                        <div>
+                        <h2>Log Out</h2>
+                        <p>Hello, ${user._id}/${user.local.email}</p>
+                        <button onclick="logout(event)">Log out</button>
+                        </div>`
+                } else {
+                    document.getElementById('app').innerHTML = `
+                        <h1>Linkgear Ooth Example</h1>
+                        <hr>
+                        <div>
+                            <h2>Register</h2>
+                            <form onsubmit="register(event)">
+                                <div><label>E-Mail &emsp;<input id="register-email" type="email"/></label></div>
+                                <div><label>Password <input id="register-password" type="password"/></label><br></div>
+                                <button>Register</button>
+                            </form>
+                        </div>
+                        <hr>
+                        <div>
+                            <h2>Log in</h2>
+                            <form onsubmit="login(event)">
+                                <div><label>E-Mail &emsp; <input id="login-email" type="email"/></label></div>
+                                <div><label>Password <input id="login-password" type="password"/></label><br></div>
+                                <button>Log in</button>
+                            </form>
+                        </div>
+                        <hr>
+                        <div>
+                            <h2>Forgot Password</h2>
+                            <form onsubmit="onForgotPassword(event)">
+                                <div><label>E-Mail <input id="forgotpassword-email" type="email"/></label></div>
+                                <button>ForgotPassword</button>
+                            </form> 
+                        </div>
+                        <hr>
+                        <div>
+                            <h2>Reset Password </h2>
+                            <form onsubmit="onResetPassword(event)">
+                                <div><label>User Id<input id="resetpassword-userid" type="text"/></label></div>
+                                <div><label>Token<input id="resetpassword-token" type="text"/></label></div>
+                                <div><label>New password<input id="resetpassword-password" type="password"/></label></div>
+                                <button>ResetPassword</button>
+                            </form> 
+                        </div>
+                        <div>
+                    `   
+                }
+            }
+
+            let user = null
+        </script>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script>checkUser()</script>
+    </body>
+</html>
