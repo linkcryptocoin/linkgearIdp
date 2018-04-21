@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link href="https://www.linkcryptocoin.com/images/fav/favicon.ico" rel="shortcut icon">
         <script>
             async function register(e) {
                 e.preventDefault()
@@ -221,7 +222,10 @@
             function render() {
                 if (user) {
                     document.getElementById('app').innerHTML = `
-                        <h1>Linkgear Ooth Example - ${user.local.email} logged in</h1>
+                        <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
+                             height="25px" width="25px" 
+                             alt="linkgearG.png">
+                       Linkgear Ooth Example - ${user.local.email} logged in</h1>
                         <p> userId: ${user._id} </p>
                         <p> linkgearAccount: ${user.local.account} </p>
                         <hr>
@@ -256,7 +260,10 @@
                         </div>`
                 } else {
                     document.getElementById('app').innerHTML = `
-                        <h1>Linkgear Ooth Example</h1>
+                        <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
+                             height="25px" width="25px" 
+                             alt="linkgearG.png">
+                        Linkgear Ooth Example</h1>
                         <hr>
                         <div>
                             <h2>Register</h2>

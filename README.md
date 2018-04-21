@@ -6,8 +6,8 @@
 5) the users collection is stored on an mongodb(mongo --port 32786)   
 
 ## Server Start
-yarn
-yarn start
+1) yarn
+2) yarn start or forever start index.js
 
 ## client
 http://linkcryptcoin.com:8091
