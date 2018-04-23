@@ -7,24 +7,44 @@ const oothLocal = require('./ooth-local.js')
 const OothMongo = require('ooth-mongo')
 const https = require('https')
 const fs = require('fs')
-//const MONGO_HOST = 'mongodb://localhost:27017'
-//const MONGO_DB = 'ooth-minimal'
-//const HOST = 'https://localhost'
+const MONGO_HOST_LOCAL = 'mongodb://localhost:27017'
+const HOST_LOCAL = 'https://localhost'
+const HOST_LOCALN = 'http://localhost'
 //const PORT = 3000
 const MONGO_HOST = 'mongodb://172.31.83.105:32786'
 const MONGO_DB = 'linkgear'
 const HOST = 'https://172.31.83.105'
 const HOSTN = 'http://172.31.83.105'
-const PORT = 8091
+//const PORT = 8091
+var PORT = 8091
 const SECRET = 'linkgearsecret'
 const SHARED_SECRET = 'linkgearsharedsecret'
 const OOTH_PATH = '/auth'
 
 const cors = require('cors')
 
+var localRun = false;  // Local run flag
+var httpsRun = false;  // https or http, default is http
+
+// Get the port number if provided in the arguments
+var prearg = "";
+process.argv.forEach(function (val, index, array) {
+   //console.log(`val: ${val}`);
+   if (/^(-{1,2}[p|P][o|O][r|R][t|T])$/.test(prearg) && !isNaN(val)) {
+      PORT = val;
+   }  
+   else if (/^(-{1,2}[l|L][o|O][c|C][a|A][l|L])$/.test(val))
+      localRun = true;
+   else if (/^(-{1,2}[h|H][t|T]{2}[p|P][s|S])$/.test(val))
+      httpsRun = true;
+
+   prearg = val;
+})
+//console.log(`PORT# is ${PORT}`);
+
 const start = async () => {
     try {
-        const client = await MongoClient.connect(MONGO_HOST)
+        const client = await MongoClient.connect(localRun? MONGO_HOST_LOCAL : MONGO_HOST)
         const db = client.db(MONGO_DB)
     
         const app = express()
@@ -71,17 +91,17 @@ const start = async () => {
         console.log(`${__dirname}/index.html`);
         app.get('/', (req, res) => res.sendFile(`${__dirname}/index.html`))
         
-        if (false) {
+        if (httpsRun) {
             const server = https.createServer({
                          key: fs.readFileSync('keys/key.pem'),
                          cert: fs.readFileSync('keys/cert.pem'),
                          }, app)
 
              await new Promise(resolve => server.listen(PORT, resolve));
-             console.info(`Online at ${HOST}:${PORT}`);
+             console.info(`Online at ${localRun?HOST_LOCAL:HOST}:${PORT}`);
         } else { 
              await promisify(app.listen)(PORT) 
-             console.info(`Online at ${HOSTN}:${PORT}`);
+             console.info(`Online at ${localRun?HOST_LOCALN:HOSTN}:${PORT}`);
         }
     } catch (e) {
         console.error(e)
