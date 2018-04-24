@@ -8,6 +8,7 @@
 ## Server Start
 1) yarn
 2) yarn start or forever start index.js
+3) or use port 3200 with https: yarn start --port 3200 --https
 
 ## client
-http://linkcryptcoin.com:8091
+http://linkcryptocoin.com:8091
