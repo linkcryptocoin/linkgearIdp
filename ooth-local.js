@@ -61,6 +61,7 @@ module.exports = function ({
     onVerify,
     onForgotPassword,
     onResetPassword,
+    onLinkAccount,
     onChangePassword
 }) {
     return function ({
@@ -403,6 +404,35 @@ module.exports = function ({
                 });
             });
         });
+
+        // Link the account
+        //
+        registerMethod('link-account', requireLogged, function (req, res) {
+            const { account } = req.body;
+            
+            if (!typeof account === 'string')
+                throw new Error('Invalid type for account.');
+
+            if (!linkgearaccount.isAddress(account))
+                throw new Error(`Invalid linkgear account ${account}.`);
+           
+            return getUser(req.user._id).then(user=> {
+                updateUser(user._id, {
+                    account: account
+                }).then(() => {
+                    if (onLinkAccount) {
+                        onLinkAccount({
+                            _id: user._id,
+                            email: user[name] && user[name].email,
+                            account: account
+                        });
+                    }              
+                    return res.send({
+                        message: 'Account has been linked.'
+                    });
+                });
+            });
+        });        
 
         registerMethod('change-password', requireLogged, function (req, res) {
             const { password, newPassword } = req.body;

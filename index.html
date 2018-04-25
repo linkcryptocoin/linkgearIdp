@@ -138,6 +138,29 @@
                 alert(body.message) 
             }
             
+            // Link Account
+            async function onLinkAccount(e) {
+                //alert("onLinkAccount");
+                e.preventDefault();
+                const user = await getUser()
+                const account = document.getElementById('linkaccount-account').value;
+
+                alert(`account=${account}`)
+                const res = await fetch('/auth/local/link-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    user: {_id : user._id},
+                    body: JSON.stringify({
+                          account,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(body.message) 
+            }
+
             // Change password
             async function onChangePassword(e) {
                 alert("onChangePassword");
@@ -242,6 +265,14 @@
                                 <div><label>Token&nbsp;<input id="verify-token" type="text"/></label></div>
                                 <button>VerifyToken</button>
                             </form>
+                        </div>
+                        <hr>
+                        <div>
+                            <h2> Link Linkgear Account</h2>
+                            <form onsubmit="onLinkAccount(event)">
+                                <div><label>Account&nbsp;&nbsp;&nbsp;<input id="linkaccount-account" type="text"/></label></div>
+                                <button>LinkAccount</button>
+                            </form> 
                         </div>
                         <hr>
                         <div>

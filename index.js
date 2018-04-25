@@ -99,9 +99,13 @@ const start = async () => {
                 console.log(`${email} reset its password`)
                 logging(`${email} reset its password`)
             },
+            onLinkAccount({email, account}) {
+                console.log(`${email} changed its account ${account}`)
+                logging(`${email} changed its account to ${account}`)
+            },
             onChangePassword({email}) {
                 console.log(`${email} changed its password`)
-                console.log(`${email} changed its password`)
+                logging(`${email} changed its password`)
             },
          }), function(req, res,next) {
                 console.log(`Request type: ${req.type}`)
@@ -118,10 +122,10 @@ const start = async () => {
                          }, app)
 
              await new Promise(resolve => server.listen(PORT, resolve));
-             console.info(`Online at ${localRun?HOST_LOCAL:HOST}:${PORT}`);
+             console.log(`Online at ${localRun?HOST_LOCAL:HOST}:${PORT}`);
         } else { 
              await promisify(app.listen)(PORT) 
-             console.info(`Online at ${localRun?HOST_LOCALN:HOSTN}:${PORT}`);
+             console.log(`Online at ${localRun?HOST_LOCALN:HOSTN}:${PORT}`);
         }
     } catch (e) {
         console.error(e)
