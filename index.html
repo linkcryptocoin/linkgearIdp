@@ -239,16 +239,19 @@
                         <div>
                             <h2>Verify Token</h2>
                             <form onsubmit="onVerify(event)">
-                                <div><label>Token<input id="verify-token" type="text"/></label></div>
+                                <div><label>Token&nbsp;<input id="verify-token" type="text"/></label></div>
                                 <button>VerifyToken</button>
                             </form>
                         </div>
                         <hr>
                         <div>
-                            <h2> Change Password </h2>
+                            <h2> Change Password 
+                            <small> (your original password is still linked to your linkgear account) 
+                            </small>
+                            </h2>
                             <form onsubmit="onChangePassword(event)">
-                                <div><label>Old Password<input id="changepassword-old" type="password"/></label></div>
-                                <div><label>New Password<input id="changepassword-new" type="password"/></label></div>
+                                <div><label>Old Password&nbsp;&nbsp;&nbsp;<input id="changepassword-old" type="password"/></label></div>
+                                <div><label>New Password&nbsp;<input id="changepassword-new" type="password"/></label></div>
                                 <button>ChangePassword</button>
                             </form> 
                         </div>
@@ -278,7 +281,7 @@
                             <h2>Log in</h2>
                             <form onsubmit="login(event)">
                                 <div><label>E-Mail &emsp; <input id="login-email" type="email"/></label></div>
-                                <div><label>Password <input id="login-password" type="password"/></label><br></div>
+                                <div><label>Password &nbsp;<input id="login-password" type="password"/></label><br></div>
                                 <button>Log in</button>
                             </form>
                         </div>
@@ -292,11 +295,14 @@
                         </div>
                         <hr>
                         <div>
-                            <h2>Reset Password </h2>
+                            <h2>Reset Password 
+                            <small> (your original password is still linked to your linkgear account) 
+                            </small>
+                            </h2>
                             <form onsubmit="onResetPassword(event)">
-                                <div><label>User Id<input id="resetpassword-userid" type="text"/></label></div>
-                                <div><label>Token<input id="resetpassword-token" type="text"/></label></div>
-                                <div><label>New password<input id="resetpassword-password" type="password"/></label></div>
+                                <div><label>User Id&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="resetpassword-userid" type="text"/></label></div>
+                                <div><label>Token&emsp;&emsp;&emsp;&nbsp;&nbsp;<input id="resetpassword-token" type="text"/></label></div>
+                                <div><label>New password&nbsp;<input id="resetpassword-password" type="password"/></label></div>
                                 <button>ResetPassword</button>
                             </form> 
                         </div>
