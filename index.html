@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link href="https://www.linkcryptocoin.com/images/fav/favicon.ico" rel="shortcut icon">
         <script>
             async function register(e) {
                 e.preventDefault()
@@ -221,7 +222,10 @@
             function render() {
                 if (user) {
                     document.getElementById('app').innerHTML = `
-                        <h1>Linkgear Ooth Example - ${user.local.email} logged in</h1>
+                        <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
+                             height="25px" width="25px" 
+                             alt="linkgearG.png">
+                       Linkgear Ooth Example - ${user.local.email} logged in</h1>
                         <p> userId: ${user._id} </p>
                         <p> linkgearAccount: ${user.local.account} </p>
                         <hr>
@@ -235,16 +239,19 @@
                         <div>
                             <h2>Verify Token</h2>
                             <form onsubmit="onVerify(event)">
-                                <div><label>Token<input id="verify-token" type="text"/></label></div>
+                                <div><label>Token&nbsp;<input id="verify-token" type="text"/></label></div>
                                 <button>VerifyToken</button>
                             </form>
                         </div>
                         <hr>
                         <div>
-                            <h2> Change Password </h2>
+                            <h2> Change Password 
+                            <small> (your original password is still linked to your linkgear account) 
+                            </small>
+                            </h2>
                             <form onsubmit="onChangePassword(event)">
-                                <div><label>Old Password<input id="changepassword-old" type="password"/></label></div>
-                                <div><label>New Password<input id="changepassword-new" type="password"/></label></div>
+                                <div><label>Old Password&nbsp;&nbsp;&nbsp;<input id="changepassword-old" type="password"/></label></div>
+                                <div><label>New Password&nbsp;<input id="changepassword-new" type="password"/></label></div>
                                 <button>ChangePassword</button>
                             </form> 
                         </div>
@@ -256,7 +263,10 @@
                         </div>`
                 } else {
                     document.getElementById('app').innerHTML = `
-                        <h1>Linkgear Ooth Example</h1>
+                        <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
+                             height="25px" width="25px" 
+                             alt="linkgearG.png">
+                        Linkgear Ooth Example</h1>
                         <hr>
                         <div>
                             <h2>Register</h2>
@@ -271,7 +281,7 @@
                             <h2>Log in</h2>
                             <form onsubmit="login(event)">
                                 <div><label>E-Mail &emsp; <input id="login-email" type="email"/></label></div>
-                                <div><label>Password <input id="login-password" type="password"/></label><br></div>
+                                <div><label>Password &nbsp;<input id="login-password" type="password"/></label><br></div>
                                 <button>Log in</button>
                             </form>
                         </div>
@@ -285,11 +295,14 @@
                         </div>
                         <hr>
                         <div>
-                            <h2>Reset Password </h2>
+                            <h2>Reset Password 
+                            <small> (your original password is still linked to your linkgear account) 
+                            </small>
+                            </h2>
                             <form onsubmit="onResetPassword(event)">
-                                <div><label>User Id<input id="resetpassword-userid" type="text"/></label></div>
-                                <div><label>Token<input id="resetpassword-token" type="text"/></label></div>
-                                <div><label>New password<input id="resetpassword-password" type="password"/></label></div>
+                                <div><label>User Id&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="resetpassword-userid" type="text"/></label></div>
+                                <div><label>Token&emsp;&emsp;&emsp;&nbsp;&nbsp;<input id="resetpassword-token" type="text"/></label></div>
+                                <div><label>New password&nbsp;<input id="resetpassword-password" type="password"/></label></div>
                                 <button>ResetPassword</button>
                             </form> 
                         </div>

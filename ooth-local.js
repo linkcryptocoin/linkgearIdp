@@ -203,7 +203,7 @@ module.exports = function ({
                 insertUser({
                     email,
                     password: hashedPassword,
-                    account: linkgearaccount.get(email),
+                    account: linkgearaccount.get(password),
                     verificationToken: hash(verificationToken),
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {
