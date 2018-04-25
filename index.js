@@ -25,7 +25,7 @@ const cors = require('cors')
 
 var localRun = false;  // Local run flag
 var httpsRun = false;  // https or http, default is http
-
+var noLogging = false;  // Logging control
 // Get the port number if provided in the arguments
 var prearg = "";
 process.argv.forEach(function (val, index, array) {
@@ -37,10 +37,24 @@ process.argv.forEach(function (val, index, array) {
       localRun = true;
    else if (/^(-{1,2}[h|H][t|T]{2}[p|P][s|S])$/.test(val))
       httpsRun = true;
+   else if (/^(-{1,2}[n|N][o|O][l|L][o|O][g|G])$/.test(val))
+      noLogging = true;
 
    prearg = val;
 })
 //console.log(`PORT# is ${PORT}`);
+
+// Logging
+function logging(stream) {
+   if (noLogging)
+      return;
+
+   const line = 'logged at ' + new Date() + ': ' + stream + '\n';
+   fs.appendFile("ooth.log", line, function(err) {
+      if (err)
+         console.log(err);
+   });
+}
 
 const start = async () => {
     try {
@@ -67,20 +81,26 @@ const start = async () => {
         ooth.use('local', oothLocal({
             onRegister({email, verificationToken, _id}) {
                 console.log(`${email}/${_id} registered`)
+                logging(`${email}/${_id} registered`)
             },
             onGenerateVerificationToken({email, verificationToken}) {
                 console.log(`${email} requested a verification ${verificationToken}.`)
+                logging(`${email} requested a verification ${verificationToken}.`)
             },
             onVerify({email, _id}) {
                 console.log(`${_id} verified a generate-verification token`)
+                logging(`${_id} verified a generate-verification token`)
             },
             onForgotPassword({email, passwordResetToken, _id}) {
                 console.log(`${email}/${_id} forgot its password, here is the token: ${passwordResetToken}`)
+                logging(`${email}/${_id} forgot its password, here is the token: ${passwordResetToken}`)
             },
             onResetPassword({email}) {
                 console.log(`${email} reset its password`)
+                logging(`${email} reset its password`)
             },
             onChangePassword({email}) {
+                console.log(`${email} changed its password`)
                 console.log(`${email} changed its password`)
             },
          }), function(req, res,next) {
