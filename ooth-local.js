@@ -183,7 +183,7 @@ module.exports = function ({
         });
 
         registerMethod('register', requireNotLogged, function (req, res) {
-            const { email, password } = req.body;
+            const { email, password, account } = req.body;
 
             if (typeof email !== 'string') {
                 throw new Error('Invalid email');
@@ -193,6 +193,17 @@ module.exports = function ({
             }
 
             testValue('password', password);
+
+            // Linkgear Account
+            var linkgearAccount = "";
+            if (account) {
+                if (!linkgearaccount.isAddress(account))
+                    throw new Error(`Invalid Linkgear Account ${account}`);
+                linkgearAccount = account;
+            }
+            else {
+                linkgearAccount = linkgearaccount.get(password); 
+            }
 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
@@ -204,7 +215,7 @@ module.exports = function ({
                 insertUser({
                     email,
                     password: hashedPassword,
-                    account: linkgearaccount.get(password),
+                    account: linkgearAccount,
                     verificationToken: hash(verificationToken),
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {

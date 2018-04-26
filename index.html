@@ -7,6 +7,7 @@
                 e.preventDefault()
                 const email = document.getElementById('register-email').value
                 const password = document.getElementById('register-password').value
+                const account = document.getElementById('register-account').value
                 const res = await fetch('/auth/local/register', {
                     method: 'POST',
                     headers: {
@@ -15,6 +16,7 @@
                     body: JSON.stringify({
                         email,
                         password,
+                        account,
                     }),
                     credentials: 'include',
                 })
@@ -304,6 +306,7 @@
                             <form onsubmit="register(event)">
                                 <div><label>E-Mail &emsp;<input id="register-email" type="email"/></label></div>
                                 <div><label>Password <input id="register-password" type="password"/></label><br></div>
+                                <div><label>Account &nbsp;&nbsp<input id="register-account" type="text"/></label><br></div>
                                 <button>Register</button>
                             </form>
                         </div>
