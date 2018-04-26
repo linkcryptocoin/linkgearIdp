@@ -100,8 +100,8 @@ const start = async () => {
                 logging(`${email} reset its password`)
             },
             onLinkAccount({email, account}) {
-                console.log(`${email} changed its account ${account}`)
-                logging(`${email} changed its account to ${account}`)
+                console.log(`${email} links account ${account}`)
+                logging(`${email} links account ${account}`)
             },
             onChangePassword({email}) {
                 console.log(`${email} changed its password`)

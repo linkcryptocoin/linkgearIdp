@@ -416,7 +416,7 @@ module.exports = function ({
             if (!linkgearaccount.isAddress(account))
                 throw new Error(`Invalid linkgear account ${account}.`);
            
-            return getUser(req.user._id).then(user=> {
+            return getUserById(req.user._id).then(user=> {
                 updateUser(user._id, {
                     account: account
                 }).then(() => {
