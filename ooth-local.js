@@ -194,21 +194,18 @@ module.exports = function ({
 
             testValue('password', password);
 
-            // Linkgear Account
-            var linkgearAccount = "";
-            if (account) {
-                if (!linkgearaccount.isAddress(account))
-                    throw new Error(`Invalid Linkgear Account ${account}`);
-                linkgearAccount = account;
-            }
-            else {
-                linkgearAccount = linkgearaccount.get(password); 
-            }
+            // Validate the account if an account is passed
+            if (account && !linkgearaccount.isAddress(account))
+                throw new Error(`Invalid Linkgear Account ${account}`);
 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
                     throw new Error('This email is already registered.');
                 }
+                 
+                // Linkgear Account
+                const linkgearAccount = account? account : 
+                                        linkgearaccount.get(password); 
 
                 const verificationToken = randomToken();
                 const hashedPassword = hash(password);
