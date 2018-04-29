@@ -163,6 +163,161 @@
                 alert(body.message) 
             }
 
+            // Smart contract
+            async function onAdd(e) {
+                e.preventDefault();
+                const amount1 = document.getElementById('amount1').value;
+                const amount2 = document.getElementById('amount2').value;
+                const res = await fetch('/auth/local/t-add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          amount1,
+                          amount2,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
+            async function onDeductRewards(e) {
+                e.preventDefault();
+                const addr = document.getElementById('sc-deduct-addr').value;
+                const amount = document.getElementById('sc-deduct-amount').value;
+                alert(`account=${addr}, amount=${amount}`)
+                const res = await fetch('/auth/local/t-deductRewards', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          addr,
+                          amount,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
+            async function onSetExchangeRate(e) {
+                e.preventDefault();
+                const rate = document.getElementById('sc-rate').value;
+                alert(`rate=${rate}`)
+                const res = await fetch('/auth/local/t-setExchangeRate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          rate,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
+            async function onGetExchangeRate(e) {
+                e.preventDefault();
+                const res = await fetch('/auth/local/t-getExchangeRate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
+            async function onLinkgearToToken(e) {
+                e.preventDefault();
+                const key = document.getElementById('sc-token-key').value;
+                const addr = document.getElementById('sc-token-addr').value;
+                const amount = document.getElementById('sc-token-amount').value;
+                alert(`addr=${addr}, amount=${amount}`)
+                const res = await fetch('/auth/local/t-linkgearToToken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          key, addr,
+                          amount,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
+            async function onRedeemToken(e) {
+                e.preventDefault();
+                const addr = document.getElementById('sc-redeem-addr').value;
+                const amount = document.getElementById('sc-redeem-amount').value;
+                alert(`addr=${addr}, amount=${amount}`)
+                const res = await fetch('/auth/local/t-redeemToken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          addr,
+                          amount,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+            async function onWithdraw(e) {
+                e.preventDefault();
+                const addr = document.getElementById('sc-withdraw-addr').value;
+                const key = document.getElementById('sc-withdraw-key').value;
+                alert(`addr=${addr}, key=${key}}`)
+                const res = await fetch('/auth/local/t-withdraw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          addr,
+                          key,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
+            async function onUserReward(e) {
+                e.preventDefault();
+                const user = document.getElementById('sc-user-user').value;
+                const password = document.getElementById('sc-user-password').value;
+                const addr = document.getElementById('sc-uer-addr').value;
+                const amount = document.getElementById('sc-user-amount').value;
+                alert(`user=${user}, addr=${addr}, amount=${amount}`)
+                const res = await fetch('/auth/local/t-userReward', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          user, password, addr,
+                          amount,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
+
             // Change password
             async function onChangePassword(e) {
                 alert("onChangePassword");
@@ -293,7 +448,52 @@
                         <h2>Log Out</h2>
                         <p>Hello, ${user._id}/${user.local.email}</p>
                         <button onclick="logout(event)">Log out</button>
-                        </div>`
+                        </div>
+                        <hr>
+                        <div>
+                        <h2> Smart Contract Test </h2>
+                          <form onsubmit="onAdd(event)">
+                                <div><label>amount 1&nbsp;<input id="amount1" type="number" step=".01"/></label></div>
+                                <div><label>amount 2&nbsp;<input id="amount2" type="number" step=".01"/></label></div>
+                                <button>Add</button>
+                          </form><hr>
+                          <form onsubmit="onDeductRewards(event)">
+                                <div><label>addr&nbsp;&nbsp;&nbsp;<input id="sc-deduct-addr" type="text"/></label></div>
+                                <div><label>amount&nbsp;<input id="sc-deduct-amount" type="number" step=".01"/></label></div>
+                                <button>DeductRewards</button>
+                          </form><hr> 
+                          <form onsubmit="onUserReward(event)">
+                                <div><label>user&nbsp;<input id="sc-user-user" type="text"/></label></div>
+                                <div><label>password&nbsp;<input id="sc-uer-password" type="password"/></label></div>
+                                <div><label>addr&nbsp;&nbsp;&nbsp;<input id="sc-user-addr" type="text"/></label></div>
+                                <div><label>amount&nbsp;<input id="sc-user-amount" type="number" step=".01"/></label></div>
+                                <button>UserReward</button>
+                          </form><hr> 
+                          <form onsubmit="onGetExchangeRate(event)">
+                                <button>GetExchangeRate</button>
+                          </form> 
+                          <form onsubmit="onSetExchangeRate(event)">
+                                <div><label>rate&nbsp;<input id="sc-rate" type="number" step=".01"/></label></div>
+                                <button>SetExchangeRate</button>
+                          </form><hr> 
+                          <form onsubmit="onLinkgearToToken(event)">
+                                <div><label>addr&nbsp;<input id="sc-token-addr" type="text"/></label></div>
+                                <div><label>key&nbsp;<input id="sc-token-key" type="password"/></label></div>
+                                <div><label>amount&nbsp;<input id="sc-token-amount" type="number" step=".01"/></label></div>
+                                <button>LinkgearToToken</button>
+                          </form><hr> 
+                          <form onsubmit="onRedeem(event)">
+                                <div><label>addr&nbsp;<input id="sc-redeem-addr" type="text"/></label></div>
+                                <div><label>amount&nbsp;<input id="sc-redeem-amount" type="number" step=".01"/></label></div>
+                                <button>Redeem</button>
+                          </form><hr> 
+                          <form onsubmit="onWithdraw(event)">
+                                <div><label>addr&nbsp;<input id="sc-withdraw-addr" type="text"/></label></div>
+                                <div><label>key&nbsp;<input id="sc-withdraw-key" type="password"/></label></div>
+                                <button>Withdraw</button>
+                          </form> 
+                        </div>
+                        `
                 } else {
                     document.getElementById('app').innerHTML = `
                         <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 

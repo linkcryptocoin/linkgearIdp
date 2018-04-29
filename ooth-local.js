@@ -413,6 +413,55 @@ module.exports = function ({
             });
         });
 
+        // Link the account - smart contract
+        //
+        registerMethod('t-add', requireLogged, function (req, res) {
+            const {amount1, amount2} = req.body;
+            const result = parseFloat(amount1) + parseFloat(amount2);                   
+            return res.send({ message: 'Add for testing', result: result });
+        });
+        
+        registerMethod('t-deductRewards', requireLogged, function (req, res) {
+            const {addr, amount} = req.body;
+            const result = linkgearaccount.deductRewards(addr, amount);                   
+            return res.send({ message: 'Deduct Rewards', result: result });
+        });
+        
+        registerMethod('t-userReward', requireLogged, function (req, res) {
+            const { user, password, addr, amount } = req.body;
+            const result = linkgearaccount.userReward(user, password, addr, amount);
+            return res.send({ message: 'User Rewards', result: result });
+        });
+        
+        registerMethod('t-setExchangeRate', requireLogged, function (req, res) {
+            const { rate } = req.body;
+            const result = linkgearaccount.setExchangeRate(rate);
+            return res.send({ message: 'Set Exchange Rate', result: result });
+        });
+        
+        registerMethod('t-getExchangeRate', requireLogged, function (req, res) {
+            const result = linkgearaccount.getExchangeRate();
+            return res.send({ message: 'Get Exchange Rate', result: result });
+        });
+        
+        registerMethod('t-linkgearToToken', requireLogged, function (req, res) {
+            const {addr, key, amount} = req.body;
+            const result = linkgearaccount.linkgearToToken(addr, key, amount);
+            return res.send({ message: 'Linkgear to Token', result: result });
+        });
+        
+        registerMethod('t-redeemToken', requireLogged, function (req, res) {
+            const {addr, amount} = req.body;
+            const result = linkgearaccount.redeemToken(addr, amount);
+            return res.send({ message: 'Redeem Token', result: result });
+        });
+
+        registerMethod('t-withdraw', requireLogged, function (req, res) {
+            const {addr, key} = req.body;
+            const result = linkgearaccount.withdraw(addr, key);
+            return res.send({ message: 'Withdraw', result: result });
+        });
+        
         // Link the account
         //
         registerMethod('link-account', requireLogged, function (req, res) {
