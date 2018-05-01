@@ -1,0 +1,115 @@
+// node tokenTest.js
+// purpose: test the smart contract functions in node.js
+// 1) npm i web3
+// 2) obtain the file "linkgearaccount.js" into the current folder
+const linkgearaccount = require('./linkgearaccount.js');
+const web3 = linkgearaccount.getWeb3();
+
+// Send rewards to user(publisher)
+   sendRewards(addr, amout)
+
+// deduct rewards from user(publisher)
+   deductRewards(addr, amout) 
+
+// user send rewards publisher or other user
+   userReward(user,addr, amout)
+
+// Checck Balance of this node
+   checkAllBalances()
+   
+//wait for MilliSeconds - wait(5000) wait 5 seconds
+function wait(ms) {
+    const start = new Date().getTime();
+    var end = start;
+    while (end < start + ms) {
+        end = new Date().getTime();
+    }
+}
+
+// This function shows how to send rewards to user(publisher)
+function sendRewards(addr, amout) {
+    // Balance before rewards
+    console.log("   Account " + addr + " before rewards balance: " + myToken.balanceOf(addr));
+    // transfer rewards
+    const result = linkgearaccount.transfer(addr,amout) // the result will be the transaction hash
+    if (result) {
+        console.log('Wait 10 seconds before get transaction');
+        wait(10000); // wait for 15 seconds
+        str = JSON.stringify(web3.getTransaction(result), null, 4);
+        console.log(str);
+    }
+  
+    // Balance after rewards
+    console.log("If blockNumber is null, the transaction is not mined yet");
+    console.log("   Account " + addr + " after rewards balance: " + myToken.balanceOf(addr));
+}
+
+// This function shows how to deduct rewards from user(publisher)
+function deductRewards(addr, amout) {
+    // Balance before deduction
+    console.log("   Account " + addr + " before deduction balance: " + myToken.balanceOf(addr));
+
+    // deduct rewards
+    result = linkgearaccount.transfer(addr, amout) // the result will be the transaction hash
+
+    if (result) {
+        console.log('Wait 10 seconds before get transaction');
+        wait(10000);
+        str = JSON.stringify(web3.eth.getTransaction(result), null, 4);
+        console.log(str);
+    }
+  
+    // Balance after deduction
+    console.log("If blockNumber is null, the transaction is not mined yet");
+    console.log("   Account " + addr + " after rewards balance: " + myToken.balanceOf(addr));
+}
+
+// This function shows how a user can send rewards publisher
+function userReward(fromAddr, privateKey, toAddr, amout) {
+    result = linkgearaccount.transferFrom(fromAddr, privateKey, toAddr, amout) // the result will be the transaction hash
+    if (result) {
+        console.log('Wait 10 seconds before get transaction');
+        wait(10000);
+        str = JSON.stringify(web3.eth.getTransaction(result), null, 4);
+        console.log(str);
+    }
+}
+
+// Check the balances for all the accounts
+function checkAllBalances() {
+    var idx = 0;
+    web3.eth.accounts.forEach( function(acct) {  // 1 ether = 1 ligear
+         console.log("   Account[" + idx++ + "]:" +
+         acct + " \tbalance: " + linkgearaccount.getTokenBalance(acct) + 
+         "  token"); 
+    })  
+};
+
+// Set Exchange Rate
+function setExchangeRate() {
+    linkgearaccount.setExchangeRate(200);
+    console.log("set Exchange Rate")
+}
+
+// Get Exchange Rate
+function getExchangeRate() {
+    const result = linkgearaccount.getExchangeRate()
+    console.log(result)
+}
+
+// Exchange Linkgear to Token
+function linkgearToToken(addr, privcateKey, amount) {
+    linkgearaccount.linkgearToToken(addr, privateKey, amount);
+    console.log(`The token balance of addr ${addr} is: ${linkgearaccount.getTokenBalance(addr)} token`);
+}
+
+//redeem token
+function redeemToken(addr, token) {
+    linkgearaccount.redeemToken(addr, token);
+    console.log("Token redeemed, please withdraw funtion to get ligear")
+}
+
+function withdraw(addr. privateKey) {
+    linkgearaccount.withdraw(addr, privateKey);
+    console.log(`The token balance of addr ${addr} is: ${linkgearaccount.getTokenBalance(addr)} token`);
+}
