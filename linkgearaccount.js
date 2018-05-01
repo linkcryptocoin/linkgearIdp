@@ -140,23 +140,31 @@ const breakInKey = 'Please change this during running time';
 const defaultGasConsumed = 8000000;
 
 // This function shows how to send rewards to user(publisher)
-module.exports.sendRewards = function(addr, amout) {
+// Transfer the amount from the owner account to the account
+module.exports.sendRewards = function(toAccount, amount) {
    // transfer rewards
-   return linkgearToken.transfer(addr,amout); // the result will be the transaction hash
+   return linkgearToken.transfer(toAccount, amount); // the result will be the transaction hash
 }
 
 // This function shows how to deduct rewards from user(publisher)
-module.exports.deductRewards = function(addr, amount) {
-   // deduct rewards
-   const owner = linkgearToken.owner();
-   return linkgearToken.transferFrom(addr, owner, amount); // the result will be the transaction hash
+// Transfer the amount from the account to the owner account
+module.exports.deductRewards = function(fromAccount, amount) {
+   // Owner account
+   const ownerAccount = linkgearToken.owner();
+   return linkgearToken.transferFrom(fromAccount, ownerAccount, amount); // the result will be the transaction hash
 }
 
-// This function shows how a user can send rewards publisher
-module.exports.userReward = function(user,breakInkey,addr, amout) {
-    const account = (user)? user : web3.eth.coinbase;
-   web3.personal.unlockAccount(account, breakInKey);
-   return linkgearToken.transferFrom(account, addr, amout) // the result will be the transaction hash
+// This function shows how a user can send rewards publishe
+// Transfer the amount from one account to another
+module.exports.userReward = function(frmAccount, privateKey,toAccount, amount) {
+   const fromAccount = (frmAccount)? frmAccount : web3.eth.coinbase;
+   web3.personal.unlockAccount(fromAccount, privateKey);
+   return linkgearToken.transferFrom(fromAccount, toAccount, amount) // the result will be the transaction hash
+}
+
+// Get the token balance
+module.exports.getTokenBalance = function(account) {
+   return linkgearToken.balanceOf(account); 
 }
 
 // Set Exchange Rate
@@ -166,28 +174,28 @@ module.exports.setExchangeRate = function(rate) {
 
 // Get Exchange Rate
 module.exports.getExchangeRate = function() {
-   return linkgearToken.getExchangeRate()
+   return linkgearToken.getExchangeRate();
 }
-
 
 // Exchange Linkgear to Token
-module.exports.linkgearToToken = function(addr, privateKey, amount) {
-   web3.personal.unlockAccount(addr, privateKey);
-    const weiValue = web3.toWei(amount,"ether");
-   return linkgearToken.sendTransaction({from:addr,value:weiValue, gas:defaultGasConsumed});
+module.exports.linkgearToToken = function(account, privateKey, amount) {
+   web3.personal.unlockAccount(account, privateKey);
+   const weiValue = web3.toWei(amount, "ether");  // ether = ligear
+   return linkgearToken.sendTransaction({from: account,value: weiValue, gas: defaultGasConsumed});
 }
 
-//redeem token
-module.exports.redeemToken = function(addr, token) {
-   return linkgearToken.redeemToken(addr, token);
+// redeem token
+module.exports.redeemToken = function(account, token) {
+   return linkgearToken.redeemToken(account, token);
 }
 
-module.exports.withdraw = function(addr, privateKey) {
-   web3.personal.unlockAccount(addr, privateKey);
-   const eGas = linkgearToken.withdraw.estimateGas()
-   return linkgearToken.sendTransaction({from:addr, gas:eGas});
+// Withdraw a fee
+module.exports.withdraw = function(account, privateKey) {
+   const estimateGas = linkgearToken.withdraw.estimateGas(); 
+   const eGas = (estimateGas > 0)? estimateGas : defaultGasConsumed;
+  
+   web3.personal.unlockAccount(account, privateKey);
+   return linkgearToken.sendTransaction({from:account, gas: eGas});
 }  
-module.exports.getTokenBalance = function(addr) {
-   return linkgearToken.balanceOf(addr); 
-}
+
 
