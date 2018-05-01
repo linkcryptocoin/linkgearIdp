@@ -421,6 +421,20 @@ module.exports = function ({
             return res.send({ message: 'Add for testing', result: result });
         });
         
+        registerMethod('t-getTokenBalance', requireLogged, function (req, res) {
+           const {addr} = req.body; 
+           const result = (addr)? linkgearaccount.getTokenBalance(addr) 
+                               : 0;
+           return res.send({ message: 'Token balance:', result: result });
+        });        
+
+        registerMethod('t-getBalance', requireLogged, function (req, res) {
+           const {account} = req.body; 
+           const result = (account)? linkgearaccount.getBalance(account) 
+                               : 0;
+           return res.send({ message: 'Account balance:', result: result });
+        });        
+        
         registerMethod('t-deductRewards', requireLogged, function (req, res) {
             const {addr, amount} = req.body;
             const result = linkgearaccount.deductRewards(addr, amount);                   

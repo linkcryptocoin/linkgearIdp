@@ -164,6 +164,7 @@
             }
 
             // Smart contract
+            // Sample api for A + B
             async function onAdd(e) {
                 e.preventDefault();
                 const amount1 = document.getElementById('amount1').value;
@@ -180,9 +181,45 @@
                     credentials: 'include',
                 })
                 const body = await res.json()
-                alert(`${body.message} ${body.result}`) 
+                alert(`${amount1} + ${amount2} = ${body.result}`) 
             }
 
+            // Get the balance for linkgear account
+            async function getBalance(account) {
+                //alert(`account=${account}`)
+                const res = await fetch('/auth/local/t-getBalance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          account,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                //alert(`${body.message} ${body.result}`) 
+                return Math.round(parseFloat(body.result) * 100) / 100; 
+                //return body.result; 
+            }
+            
+            // Get the balance of the token
+            async function getTokenBalance(addr) {
+                const res = await fetch('/auth/local/t-getTokenBalance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          addr,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                return Math.round(parseFloat(body.result) * 100) / 100; 
+            }
+                        
+            // Deduct rewards
             async function onDeductRewards(e) {
                 e.preventDefault();
                 const addr = document.getElementById('sc-deduct-addr').value;
@@ -203,6 +240,7 @@
                 alert(`${body.message} ${body.result}`) 
             }
 
+            // Set exchange rate
             async function onSetExchangeRate(e) {
                 e.preventDefault();
                 const rate = document.getElementById('sc-rate').value;
@@ -221,6 +259,7 @@
                 alert(`${body.message} ${body.result}`) 
             }
 
+            // Get exchange rate
             async function onGetExchangeRate(e) {
                 e.preventDefault();
                 const res = await fetch('/auth/local/t-getExchangeRate', {
@@ -236,6 +275,7 @@
                 alert(`${body.message} ${body.result}`) 
             }
 
+            // Convert Linkgear to Token
             async function onLinkgearToToken(e) {
                 e.preventDefault();
                 const key = document.getElementById('sc-token-key').value;
@@ -256,7 +296,8 @@
                 const body = await res.json()
                 alert(`${body.message} ${body.result}`) 
             }
-
+          
+            // Redeem tokens
             async function onRedeemToken(e) {
                 e.preventDefault();
                 const addr = document.getElementById('sc-redeem-addr').value;
@@ -276,6 +317,8 @@
                 const body = await res.json()
                 alert(`${body.message} ${body.result}`) 
             }
+
+            // Token withdrawing
             async function onWithdraw(e) {
                 e.preventDefault();
                 const addr = document.getElementById('sc-withdraw-addr').value;
@@ -296,11 +339,12 @@
                 alert(`${body.message} ${body.result}`) 
             }
 
+            // User reward
             async function onUserReward(e) {
                 e.preventDefault();
                 const user = document.getElementById('sc-user-user').value;
                 const password = document.getElementById('sc-user-password').value;
-                const addr = document.getElementById('sc-uer-addr').value;
+                const addr = document.getElementById('sc-user-addr').value;
                 const amount = document.getElementById('sc-user-amount').value;
                 alert(`user=${user}, addr=${addr}, amount=${amount}`)
                 const res = await fetch('/auth/local/t-userReward', {
@@ -374,7 +418,12 @@
                     alert(body.message)
                     return
                 }
-                return body.user
+                var user = body.user
+                if (user) {
+                   user.chainBal = await getBalance(user.local.account);
+                   user.tokenBal = 17;
+                }
+                return user; 
             }
 
             async function checkUser() {
@@ -387,6 +436,10 @@
                     return
                 }
                 user = body.user
+                if (user) {
+                   user.chainBal = await getBalance(user.local.account);
+                   user.tokenBal = 17;
+                }
                 render()
             }
             
@@ -401,14 +454,17 @@
 
             function render() {
                 if (user) {
+                    const acctBalance = getBalance(user.local.account);
                     document.getElementById('app').innerHTML = `
                         <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
                              height="25px" width="25px" 
                              alt="linkgearG.png">
-                       Linkgear Ooth Example - ${user.local.email} logged in</h1>
-                        <p> userId: ${user._id} </p>
-                        <p> linkgearAccount: ${user.local.account} </p>
-                        <hr>
+                       Linkgear Ooth API - ${user.local.email} logged in</h1>
+                        <p>userId: ${user._id} </p>
+                        <p>linkgear Account#: ${user.local.account} </p>
+                        <p>  Account Balance: ${user.chainBal} ligear</p>
+                        <p>    Token Balance: ${user.tokenBal} token</p>
+                        <hr
                         <div>
                             <h2>Token Retrieval</h2>
 		            <form onsubmit="onGenerateVerificationToken(event)">
@@ -499,7 +555,7 @@
                         <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
                              height="25px" width="25px" 
                              alt="linkgearG.png">
-                        Linkgear Ooth Example</h1>
+                        Linkgear Ooth API</h1>
                         <hr>
                         <div>
                             <h2>Register</h2>

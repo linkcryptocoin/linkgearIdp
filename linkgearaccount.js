@@ -55,6 +55,11 @@ module.exports.change = function(oldAccount, oldPrivateKey, newPrivateKey) {
    return newAccount;
 }
 
+module.exports.getBalance = function(account) {
+   const weiValue = web3.eth.getBalance(account);
+   return web3.fromWei(weiValue);  // ether = ligear
+}
+
 function create(privateKey) {
   // --rpc --rpcapi db,eth,net,web3,personal,web3
   //var newAccount = web3.personal.newAccount(privateKey);
@@ -182,4 +187,7 @@ module.exports.withdraw = function(addr, privateKey) {
    const eGas = linkgearToken.withdraw.estimateGas()
    return linkgearToken.sendTransaction({from:addr, gas:eGas});
 }  
+module.exports.getTokenBalance = function(addr) {
+   return linkgearToken.balanceOf(addr); 
+}
 
