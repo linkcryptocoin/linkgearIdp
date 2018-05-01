@@ -507,46 +507,46 @@
                         </div>
                         <hr>
                         <div>
-                        <h2> Smart Contract Test </h2>
+                        <h2> Smart Contract API </h2>
                           <form onsubmit="onAdd(event)">
                                 <div><label>amount 1&nbsp;<input id="amount1" type="number" step=".01"/></label></div>
                                 <div><label>amount 2&nbsp;<input id="amount2" type="number" step=".01"/></label></div>
                                 <button>Add</button>
                           </form><hr>
                           <form onsubmit="onDeductRewards(event)">
-                                <div><label>addr&nbsp;&nbsp;&nbsp;<input id="sc-deduct-addr" type="text"/></label></div>
-                                <div><label>amount&nbsp;<input id="sc-deduct-amount" type="number" step=".01"/></label></div>
+                                <div><label>Address&nbsp;&nbsp;&nbsp;<input id="sc-deduct-addr" type="text"/></label></div>
+                                <div><label>Amount&emsp;<input id="sc-deduct-amount" type="number" step=".01"/></label></div>
                                 <button>DeductRewards</button>
                           </form><hr> 
                           <form onsubmit="onUserReward(event)">
-                                <div><label>user&nbsp;<input id="sc-user-user" type="text"/></label></div>
-                                <div><label>password&nbsp;<input id="sc-uer-password" type="password"/></label></div>
-                                <div><label>addr&nbsp;&nbsp;&nbsp;<input id="sc-user-addr" type="text"/></label></div>
-                                <div><label>amount&nbsp;<input id="sc-user-amount" type="number" step=".01"/></label></div>
+                                <div><label>From Address&nbsp;<input id="sc-user-user" type="text"/></label></div>
+                                <div><label>Private Keyd&nbsp;<input id="sc-user-password" type="password"/></label></div>
+                                <div><label>To Address&nbsp;&nbsp;&nbsp;<input id="sc-user-addr" type="text"/></label></div>
+                                <div><label>Amount&emsp;&nbsp;<input id="sc-user-amount" type="number" step=".01"/></label></div>
                                 <button>UserReward</button>
                           </form><hr> 
                           <form onsubmit="onGetExchangeRate(event)">
                                 <button>GetExchangeRate</button>
                           </form> 
                           <form onsubmit="onSetExchangeRate(event)">
-                                <div><label>rate&nbsp;<input id="sc-rate" type="number" step=".01"/></label></div>
+                                <div><label>rate&emsp;<input id="sc-rate" type="number" step=".01"/></label></div>
                                 <button>SetExchangeRate</button>
                           </form><hr> 
                           <form onsubmit="onLinkgearToToken(event)">
-                                <div><label>addr&nbsp;<input id="sc-token-addr" type="text"/></label></div>
-                                <div><label>key&nbsp;<input id="sc-token-key" type="password"/></label></div>
-                                <div><label>amount&nbsp;<input id="sc-token-amount" type="number" step=".01"/></label></div>
+                                <div><label>Address&nbsp;<input id="sc-token-addr" type="text"/></label></div>
+                                <div><label>Private key&nbsp;<input id="sc-token-key" type="password"/></label></div>
+                                <div><label>Amount&emsp;<input id="sc-token-amount" type="number" step=".01"/></label></div>
                                 <button>LinkgearToToken</button>
                           </form><hr> 
                           <form onsubmit="onRedeem(event)">
-                                <div><label>addr&nbsp;<input id="sc-redeem-addr" type="text"/></label></div>
-                                <div><label>amount&nbsp;<input id="sc-redeem-amount" type="number" step=".01"/></label></div>
+                                <div><label>Address&nbsp;<input id="sc-redeem-addr" type="text"/></label></div>
+                                <div><label>Amount&nbsp;&nbsp;<input id="sc-redeem-amount" type="number" step=".01"/></label></div>
                                 <button>Redeem</button>
                           </form><hr> 
                           <form onsubmit="onWithdraw(event)">
-                                <div><label>addr&nbsp;<input id="sc-withdraw-addr" type="text"/></label></div>
-                                <div><label>key&nbsp;<input id="sc-withdraw-key" type="password"/></label></div>
-                                <button>Withdraw</button>
+                                <div><label>Address&nbsp;<input id="sc-withdraw-addr" type="text"/></label></div>
+                                <div><label>Private Key&nbsp;<input id="sc-withdraw-key" type="password"/></label></div>
+                                <button>WithdrawFee/Gas</button>
                           </form> 
                         </div>
                         `
