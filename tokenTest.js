@@ -5,6 +5,13 @@
 const linkgearaccount = require('./linkgearaccount.js');
 const web3 = linkgearaccount.getWeb3();
 
+const account1 = '0xbee735fb6571decd7b14d61b975187c3ef2db28b';
+const account2 = '0x3c3ff8ad68cd65ee4df02335ded4303a6e0b0fcc';
+
+// Test the balances of an account
+console.log(`account balance: ${account1} - ${linkgearaccount.getBalance(account1)}`)
+console.log(`token balance: ${account1} - ${linkgearaccount.getTokenBalance(account1)}`)
+
 // Send rewards to user(publisher)
    sendRewards(addr, amout)
 
