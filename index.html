@@ -22,7 +22,7 @@
                 })
                 const body = await res.json()
                 if (body.status === 'error') {
-                    alert(body.message)
+                    //alert(body.message)
                     return
                 }
                 await loginWithEmailPassword(email, password)
@@ -198,8 +198,9 @@
                     credentials: 'include',
                 })
                 const body = await res.json()
+                const result = await body.result;
                 //alert(`${body.message} ${body.result}`) 
-                return Math.round(parseFloat(body.result) * 100) / 100; 
+                return Math.round(parseFloat(result) * 100) / 100; 
                 //return body.result; 
             }
             
@@ -216,7 +217,8 @@
                     credentials: 'include',
                 })
                 const body = await res.json()
-                return Math.round(parseFloat(body.result) * 100) / 100; 
+                const result = await body.result;
+                return Math.round(parseFloat(result) * 100) / 100; 
             }
                         
             // Deduct rewards
@@ -421,7 +423,7 @@
                 var user = body.user
                 if (user) {
                    user.chainBal = await getBalance(user.local.account);
-                   user.tokenBal = 17;
+                   user.tokenBal = await getTokenBalance(user.local.account);
                 }
                 return user; 
             }
@@ -438,7 +440,7 @@
                 user = body.user
                 if (user) {
                    user.chainBal = await getBalance(user.local.account);
-                   user.tokenBal = 17;
+                   user.tokenBal = await getTokenBalance(user.local.account);
                 }
                 render()
             }

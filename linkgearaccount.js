@@ -14,12 +14,14 @@ var web3 = new Web3(typeof web3 !== 'undefined'? web3.currentProvider :
 const LINKGEAR_NETWORK = '0xbda';   // =3034
 
 const mnid = require('mnid');
+const fs = require('fs');
 
 console.log(`web3.version: ${web3.version.api}`);
 
 module.exports.web3init = function() { }
 
 module.exports.web3 = function() { return web3; }
+module.exports.getWeb3 = function() { return web3; }
 
 // Get linkgear account 
 module.exports.get = function(privateKey, needEncode) {
@@ -78,6 +80,12 @@ function transfer(oldAccount, privateKey, newAccount) {
                         })
 }
 
+function getCoinbaseKey(fake) {
+   const file = '.dummyKey';
+   const [keyInput, start, end] = fs.readFileSync(file).toString().split('@');
+   return keyInput.slice(parseInt(start), parseInt(end));
+}
+
 //
 // Ethereum address checking
 // https://github.com/cilphex/ethereum-address/blob/master/index.js
@@ -133,7 +141,12 @@ module.exports.isChecksumAddress = isChecksumAddress;
 const contractABI = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_addr","type":"address"}],"name":"balanceOfWithdrawal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"linkgearToToken","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"maxTotalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"exchangeRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"withdraw","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"chainStartTime","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_addr","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_addr","type":"address"},{"name":"_token","type":"uint256"}],"name":"redeemToken","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getTokenName","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_recipients","type":"address[]"},{"name":"_values","type":"uint256[]"}],"name":"batchTransfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"ownerBurnToken","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalInitialSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"string"}],"name":"setTokenName","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_symbol","type":"string"}],"name":"setTokenSymbol","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"chainStartBlockNumber","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_exchangeRate","type":"uint256"}],"name":"setExchangeRate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getExchangeRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getTokenSymbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"burner","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]
 const contractAddress = "0x799d35A574c0142E5e1DB141FEF4645515237580";
 
+// Set the efault accounta
+web3.eth.defaultAccount = web3.eth.coinbase;
+web3.personal.unlockAccount(web3.eth.defaultAccount, getCoinbaseKey('userKey'));
+
 const linkgearToken = web3.eth.contract(contractABI).at(contractAddress);
+//console.log('linkgearToken:' + JSON.stringify(linkgearToken));
 
 const breakInKey = 'Please change this during running time';
 
@@ -151,6 +164,7 @@ module.exports.sendRewards = function(toAccount, amount) {
 module.exports.deductRewards = function(fromAccount, amount) {
    // Owner account
    const ownerAccount = linkgearToken.owner();
+   //console.log(`TransferFrom\('${fromAccount}', '${ownerAccount}', ${amount}\)`);
    return linkgearToken.transferFrom(fromAccount, ownerAccount, amount); // the result will be the transaction hash
 }
 
@@ -159,6 +173,7 @@ module.exports.deductRewards = function(fromAccount, amount) {
 module.exports.userReward = function(frmAccount, privateKey,toAccount, amount) {
    const fromAccount = (frmAccount)? frmAccount : web3.eth.coinbase;
    web3.personal.unlockAccount(fromAccount, privateKey);
+   console.log(`linkgearToken.transferFrom(${fromAccount}, ${toAccount}, ${amount}`); 
    return linkgearToken.transferFrom(fromAccount, toAccount, amount) // the result will be the transaction hash
 }
 
