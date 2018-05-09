@@ -89,6 +89,9 @@ module.exports = function ({
         registerProfileField('email');
         registerProfileField('verified');
         registerProfileField('account');
+        registerProfileField('snode');
+        registerProfileField('dname');
+        registerProfileField('createAt');
 
         registerPassportMethod('login', requireNotLogged, new LocalStrategy({
             usernameField: 'username',
@@ -183,7 +186,7 @@ module.exports = function ({
         });
 
         registerMethod('register', requireNotLogged, function (req, res) {
-            const { email, password, account } = req.body;
+            const { email, password, account, snode, dname } = req.body;
 
             if (typeof email !== 'string') {
                 throw new Error('Invalid email');
@@ -191,7 +194,10 @@ module.exports = function ({
             if (typeof password !== 'string') {
                 throw new Error('Invalid password');
             }
-
+            if (!dname) {
+		dname = email.split('@')[0]; 
+            }
+            
             testValue('password', password);
 
             // Validate the account if an account is passed
@@ -213,6 +219,9 @@ module.exports = function ({
                     email,
                     password: hashedPassword,
                     account: linkgearAccount,
+                    snode: snode,
+                    dname: dname,
+                    createAt: Date.now(),
                     verificationToken: hash(verificationToken),
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {

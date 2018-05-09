@@ -5,9 +5,11 @@
         <script>
             async function register(e) {
                 e.preventDefault()
+                const dname = document.getElementById('register-dname').value
                 const email = document.getElementById('register-email').value
                 const password = document.getElementById('register-password').value
                 const account = document.getElementById('register-account').value
+                const snode = document.getElementById('register-snode').value
                 const res = await fetch('/auth/local/register', {
                     method: 'POST',
                     headers: {
@@ -17,6 +19,8 @@
                         email,
                         password,
                         account,
+                        snode,
+                        dname,
                     }),
                     credentials: 'include',
                 })
@@ -445,6 +449,8 @@
                 if (user) {
                    user.chainBal = await getBalance(user.local.account);
                    user.tokenBal = await getTokenBalance(user.local.account);
+                   if (!user.local.dname)
+                      user.local.dname = user.local.email.split('@')[0];
                 }
                 return user; 
             }
@@ -462,6 +468,8 @@
                 if (user) {
                    user.chainBal = await getBalance(user.local.account);
                    user.tokenBal = await getTokenBalance(user.local.account);
+                   if (!user.local.dname)
+                      user.local.dname = user.local.email.split('@')[0];
                 }
                 render()
             }
@@ -483,8 +491,9 @@
                              height="25px" width="25px" 
                              alt="linkgearG.png">
                        Linkgear Ooth API - ${user.local.email} logged in</h1>
-                        <p>userId: ${user._id} </p>
+                        <p>user: ${user._id}/${user.local.dname} </p>
                         <p>linkgear Account#: ${user.local.account} </p>
+                        <p>linkgear S Node#: ${user.local.snode} </p>
                         <p>  Account Balance: ${user.chainBal} ligear</p>
                         <p>    Token Balance: ${user.tokenBal} token</p>
                         <hr
@@ -525,7 +534,7 @@
                         <hr>
                         <div>
                         <h2>Log Out</h2>
-                        <p>Hello, ${user._id}/${user.local.email}</p>
+                        <p>Hello, ${user._id}/${user.local.dname}</p>
                         <button onclick="logout(event)">Log out</button>
                         </div>
                         <hr>
@@ -588,9 +597,11 @@
                         <div>
                             <h2>Register</h2>
                             <form onsubmit="register(event)">
-                                <div><label>E-Mail &emsp;<input id="register-email" type="email"/></label></div>
-                                <div><label>Password <input id="register-password" type="password"/></label><br></div>
+                                <div><label>Name &emsp;<input id="register-dname" type="text"/>*</label></div>
+                                <div><label>E-Mail &emsp;<input id="register-email" type="email"/>*</label></div>
+                                <div><label>Password <input id="register-password" type="password"/>*</label><br></div>
                                 <div><label>Account &nbsp;&nbsp<input id="register-account" type="text"/></label></div>
+                                <div><label>S Node &nbsp;&nbsp<input id="register-snode" type="text"/></label></div>
                                 <div><small>** Leaving Account field blank will trigger a linkgear account creation(your password will be the private key for the account, we don't store your private key, please keept it safe.) otherwiser an existing account will be linked</small></div>
                                 <button>Register</button>
                             </form>
