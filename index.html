@@ -241,6 +241,27 @@
                 const body = await res.json()
                 alert(`${body.message} ${body.result}`) 
             }
+            
+            // Send rewards
+            async function onSendRewards(e) {
+                e.preventDefault();
+                const addr = document.getElementById('sc-sendr-addr').value;
+                const amount = document.getElementById('sc-sendr-amount').value;
+                alert(`account=${addr}, amount=${amount}`)
+                const res = await fetch('/auth/local/t-sendRewards', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          addr,
+                          amount,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.message} ${body.result}`) 
+            }
 
             // Set exchange rate
             async function onSetExchangeRate(e) {
@@ -519,6 +540,11 @@
                                 <div><label>Address&nbsp;&nbsp;&nbsp;<input id="sc-deduct-addr" type="text"/></label></div>
                                 <div><label>Amount&emsp;<input id="sc-deduct-amount" type="number" step=".01"/></label></div>
                                 <button>DeductRewards</button>
+                          </form><hr> 
+                          <form onsubmit="onSendRewards(event)">
+                                <div><label>Address&nbsp;&nbsp;&nbsp;<input id="sc-sendr-addr" type="text"/></label></div>
+                                <div><label>Amount&emsp;<input id="sc-sendr-amount" type="number" step=".01"/></label></div>
+                                <button>SendRewards</button>
                           </form><hr> 
                           <form onsubmit="onUserReward(event)">
                                 <div><label>From Address&nbsp;<input id="sc-user-user" type="text"/></label></div>

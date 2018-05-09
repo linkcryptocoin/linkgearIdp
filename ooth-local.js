@@ -441,6 +441,12 @@ module.exports = function ({
             return res.send({ message: 'Deduct Rewards', result: result });
         });
         
+        registerMethod('t-sendRewards', requireLogged, function (req, res) {
+            const {addr, amount} = req.body;
+            const result = linkgearaccount.sendRewards(addr, amount);                   
+            return res.send({ message: 'Send Rewards', result: result });
+        });
+        
         registerMethod('t-userReward', requireLogged, function (req, res) {
             const { user, password, addr, amount } = req.body;
             const result = linkgearaccount.userReward(user, password, addr, amount);
