@@ -222,7 +222,7 @@
                 })
                 const body = await res.json()
                 const result = await body.result;
-                return Math.round(parseFloat(result) * 100) / 100; 
+                return parseInt(result); 
             }
                         
             // Deduct rewards
@@ -490,12 +490,13 @@
                         <h1><img  src="https://www.linkcryptocoin.com/images/linkgear/linkGearGGold.png" 
                              height="25px" width="25px" 
                              alt="linkgearG.png">
-                       Linkgear Ooth API - ${user.local.email} logged in</h1>
-                        <p>user: ${user._id}/${user.local.dname} </p>
-                        <p>linkgear Account#: ${user.local.account} </p>
-                        <p>linkgear S Node#: ${user.local.snode} </p>
-                        <p>  Account Balance: ${user.chainBal} ligear</p>
-                        <p>    Token Balance: ${user.tokenBal} token</p>
+                       Linkgear Ooth API - ${user.local.dname} logged in</h1>
+                        <p>User      : ${user._id}/${user.local.dname} </p>
+                        <p>email     : ${user.local.email} </p>
+                        <p>Account#  : ${user.local.account} </p>
+                        <p>S Node#   : ${user.local.snode} </p>
+                        <p>  Balance : ${user.chainBal} ligear, ${user.tokenBal} token</p>
+                        <p>Created At: ${user.local.createdAt}</p>
                         <hr
                         <div>
                             <h2>Token Retrieval</h2>

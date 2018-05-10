@@ -1,5 +1,6 @@
 .dummyKey
 ooth.log
+*error*.log
 test*
 *.zip
 *.tar
