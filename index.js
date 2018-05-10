@@ -21,6 +21,8 @@ const SECRET = 'linkgearsecret'
 const SHARED_SECRET = 'linkgearsharedsecret'
 const OOTH_PATH = '/auth'
 
+const linkgearaccount = require('./linkgearaccount.js')
+
 const cors = require('cors')
 
 var localRun = false;  // Local run flag
@@ -56,6 +58,14 @@ function logging(stream) {
    });
 }
 
+const onLogin = function(user) {
+   if (user.local.account) { 
+       user.local.ligear = linkgearaccount.getBalance(user.local.account);
+       user.local.token  = linkgearaccount.getTokenBalance(user.local.account);
+   }
+   //console.log(`user profile: ${JSON.stringify(user)}`);
+}
+
 const start = async () => {
     try {
         const client = await MongoClient.connect(localRun? MONGO_HOST_LOCAL : MONGO_HOST)
@@ -75,6 +85,7 @@ const start = async () => {
         const ooth = new Ooth({
             sharedSecret: SHARED_SECRET,
             path: OOTH_PATH,
+            onLogin: onLogin,
         })
         const oothMongo = new OothMongo(db, ObjectId)
         await ooth.start(app, oothMongo)
