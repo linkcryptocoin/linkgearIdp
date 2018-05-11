@@ -70,7 +70,7 @@ const onAfterOothLogin = function(user) {
    user.local.ligear = linkgearaccount.getBalance(user.local.account);
    user.local.token  = linkgearaccount.getTokenBalance(user.local.account);
 
-   //console.log(`user profile: ${JSON.stringify(user)}`);
+   console.log(`user profile: ${JSON.stringify(user)}`);
 }
 /////////////////////////////////////////////////
 

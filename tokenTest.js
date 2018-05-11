@@ -7,19 +7,22 @@ const web3 = linkgearaccount.getWeb3();
 
 const account1 = '0xbee735fb6571decd7b14d61b975187c3ef2db28b';
 const account2 = '0x3c3ff8ad68cd65ee4df02335ded4303a6e0b0fcc';
+const coinbase = web3.eth.coinbase;
 
 // test 1. Checck Balance of this node
 //   checkAllBalances()
 
 // test 2. Test the balances of an account
-//console.log(`account balance: ${account1} - ${linkgearaccount.getBalance(account1)}`)
-console.log(`token balance: ${account2} - ${linkgearaccount.getTokenBalance(account2)}`)
+console.log(`coin base: ${coinbase} - ${linkgearaccount.getBalance(coinbase)}`)
+console.log(`coin base: ${coinbase} - token: ${linkgearaccount.getTokenBalance(coinbase)}`)
+console.log(`account balance: ${account2} - ${linkgearaccount.getBalance(account2)}`)
+console.log(`token balance: ${account2} - token: ${linkgearaccount.getTokenBalance(account2)}`)
 
 // test 3. deduct rewards from user(publisher)
-   deductRewards(account2, 1) 
+//   deductRewards(account2, 1) 
 
 // test 4. Send rewards to user(publisher)
-   sendRewards(account2, 1)
+//   sendRewards(account2, 1)
 
 // 5. user send rewards publisher or other user
 //   userReward(user, privateKey, account2, 1)

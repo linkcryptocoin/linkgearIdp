@@ -204,8 +204,8 @@
                 const body = await res.json()
                 const result = await body.result;
                 //alert(`${body.message} ${body.result}`) 
-                return Math.round(parseFloat(result) * 100) / 100; 
-                //return body.result; 
+                //return Math.round(parseFloat(result) * 100) / 100; 
+                return body.result; 
             }
             
             // Get the balance of the token
@@ -222,7 +222,8 @@
                 })
                 const body = await res.json()
                 const result = await body.result;
-                return parseInt(result); 
+                //return parseInt(result); 
+                return result; 
             }
                         
             // Deduct rewards
@@ -447,8 +448,8 @@
                 }
                 var user = body.user
                 if (user) {
-                   user.chainBal = await getBalance(user.local.account);
-                   user.tokenBal = await getTokenBalance(user.local.account);
+                   user.local.ligear = await getBalance(user.local.account);
+                   user.local.token = await getTokenBalance(user.local.account);
                    if (!user.local.dname)
                       user.local.dname = user.local.email.split('@')[0];
                 }
@@ -466,8 +467,8 @@
                 }
                 user = body.user
                 if (user) {
-                   user.chainBal = await getBalance(user.local.account);
-                   user.tokenBal = await getTokenBalance(user.local.account);
+                   user.local.ligear = await getBalance(user.local.account);
+                   user.local.token = await getTokenBalance(user.local.account);
                    if (!user.local.dname)
                       user.local.dname = user.local.email.split('@')[0];
                 }

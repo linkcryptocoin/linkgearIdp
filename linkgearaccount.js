@@ -73,8 +73,8 @@ module.exports.getBalance = function(account) {
    if (!account) return 0.00;
 
    const weiValue = web3.eth.getBalance(account);
-   return Math.round(parseFloat(web3.fromWei(weiValue))) * 100 /100;
-   //return web3.fromWei(weiValue);
+   //return Math.round(parseFloat(web3.fromWei(weiValue))) * 100 /100;
+   return web3.fromWei(weiValue);
    // ether = ligear
 }
 
@@ -236,7 +236,7 @@ module.exports.userReward = function(frmAccount, privateKey,toAccount, amount) {
 // Get the token balance
 module.exports.getTokenBalance = function(account) {
    if (!account) return 0.00;
-   return parseInt(linkgearToken.balanceOf(account)); 
+   return linkgearToken.balanceOf(account); 
 }
 
 // Set Exchange Rate
