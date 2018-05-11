@@ -58,14 +58,17 @@ module.exports.decode = function(dAccount) {
    return myaccount.network === LINKGEAR_NETWORK? myaccount.address : null
 }
 
+// Change the private key
 module.exports.change = function(oldAccount, oldPrivateKey, newPrivateKey) {
    const newAccount = create(newPrivateKey); // Create a new account
 
    // Transfer the balance from the old account to the new account
    transfer(oldAccount, oldPrivateKey, newAccount);
+   // oldAccount will be a garbage, will find a way to collect it
    return newAccount;
 }
 
+//The balance for a linkgear account
 module.exports.getBalance = function(account) {
    if (!account) return 0.00;
 
@@ -75,16 +78,18 @@ module.exports.getBalance = function(account) {
    // ether = ligear
 }
 
+// Create an account
 function create(privateKey) {
   // --rpc --rpcapi db,eth,net,web3,personal,web3
   //var newAccount = web3.personal.newAccount(privateKey);
   //web3.personal.newAccount(privateKey).then(successCallback);
-  var account = web3.personal.newAccount(privateKey);
+  const account = web3.personal.newAccount(privateKey);
   console.log(`Account ${account} was created`);
 
   return account;   
 }
 
+// Transfer the balance from the old account to the new account
 function transfer(oldAccount, privateKey, newAccount) {
    web3.personal.unlockAccount(oldAccount, privateKey);
    web3.sendTransaction({from: oldAccount, 
@@ -93,6 +98,7 @@ function transfer(oldAccount, privateKey, newAccount) {
                         })
 }
 
+// Get the private key
 function getCoinbaseKey(fake) {
    const file = '.dummyKey';
    const [keyInput, start, end] = fs.readFileSync(file).toString().split('@');
@@ -194,7 +200,7 @@ module.exports.sendRewards = function(toAccount, amount) {
   
    const ownerAccount = linkgearToken.owner();
    // transfer rewards
-   trackingAccts([{account: toAccount, amount: amount, sign: '+'},
+   trackingAccts([{account: toAccount,    amount: amount, sign: '+'},
                   {account: ownerAccount, amount: amount, sign: '-'}]);
 
    return linkgearToken.transfer(toAccount, amount); // the result will be the transaction hash
@@ -208,7 +214,7 @@ module.exports.deductRewards = function(fromAccount, amount) {
    // Owner account
    const ownerAccount = linkgearToken.owner();
    //console.log(`TransferFrom\('${fromAccount}', '${ownerAccount}', ${amount}\)`);
-   trackingAccts([{account: fromAccount, amount: amount, sign: '-'},
+   trackingAccts([{account: fromAccount,  amount: amount, sign: '-'},
                   {account: ownerAccount, amount: amount, sign: '+'}]);
 
    return linkgearToken.transferFrom(fromAccount, ownerAccount, amount); // the result will be the transaction hash
@@ -223,7 +229,7 @@ module.exports.userReward = function(frmAccount, privateKey,toAccount, amount) {
    web3.personal.unlockAccount(fromAccount, privateKey);
    //console.log(`linkgearToken.transferFrom(${fromAccount}, ${toAccount}, ${amount}`); 
    trackingAccts([{account: frmAccount, amount: amount, sign: '-'},
-                  {account: toAccount, amount: amount, sign: '+'}]);
+                  {account: toAccount,  amount: amount, sign: '+'}]);
    return linkgearToken.transferFrom(fromAccount, toAccount, amount) // the result will be the transaction hash
 }
 

@@ -23,8 +23,9 @@ const OOTH_PATH = '/auth'
 
 const linkgearaccount = require('./linkgearaccount.js')
 
-const cors = require('cors')
+const cors = require('cors')  
 
+//////////////////////////////////////////////////////
 var localRun = false;  // Local run flag
 var httpsRun = false;  // https or http, default is http
 var noLogging = false;  // Logging control
@@ -45,7 +46,9 @@ process.argv.forEach(function (val, index, array) {
    prearg = val;
 })
 //console.log(`PORT# is ${PORT}`);
+////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////
 // Logging
 function logging(stream) {
    if (noLogging)
@@ -57,7 +60,9 @@ function logging(stream) {
          console.log(err);
    });
 }
+//////////////////////////////////////////////////
 
+//////////////////////////////////////////////////
 // This event will be triggered after the ooth login process
 const onAfterOothLogin = function(user) {
    // The balance pair are dynamical values, which can be changed any time
@@ -67,6 +72,7 @@ const onAfterOothLogin = function(user) {
 
    //console.log(`user profile: ${JSON.stringify(user)}`);
 }
+/////////////////////////////////////////////////
 
 const start = async () => {
     try {
