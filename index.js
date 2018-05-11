@@ -58,11 +58,13 @@ function logging(stream) {
    });
 }
 
-const onLogin = function(user) {
-   if (user.local.account) { 
-       user.local.ligear = linkgearaccount.getBalance(user.local.account);
-       user.local.token  = linkgearaccount.getTokenBalance(user.local.account);
-   }
+// This event will be triggered after the ooth login process
+const onAfterOothLogin = function(user) {
+   // The balance pair are dynamical values, which can be changed any time
+   // Load the balances of the account belonging to the user
+   user.local.ligear = linkgearaccount.getBalance(user.local.account);
+   user.local.token  = linkgearaccount.getTokenBalance(user.local.account);
+
    //console.log(`user profile: ${JSON.stringify(user)}`);
 }
 
@@ -82,10 +84,13 @@ const start = async () => {
             saveUninitialized: true,
         }))
 
+        // Linkgear Account mongodb instance
+        linkgearaccount.setMongoDbo(db);
+
         const ooth = new Ooth({
             sharedSecret: SHARED_SECRET,
             path: OOTH_PATH,
-            onLogin: onLogin,
+            onLogin: onAfterOothLogin,
         })
         const oothMongo = new OothMongo(db, ObjectId)
         await ooth.start(app, oothMongo)

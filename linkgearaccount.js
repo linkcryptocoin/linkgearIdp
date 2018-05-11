@@ -15,7 +15,7 @@ const LINKGEAR_NETWORK = '0xbda';   // =3034
 
 const mnid = require('mnid');
 const fs = require('fs');
-var mongoClient = null;
+var dbo = null;
 
 console.log(`web3.version: ${web3.version.api}`);
 
@@ -24,7 +24,13 @@ module.exports.web3init = function() { }
 module.exports.web3 = function() { return web3; }
 module.exports.getWeb3 = function() { return web3; }
 
-module.exports.setMongoClient = function(imongoCient) { if (!mongoClient) mongoClient = imongoClient; }
+// We need a mongodb Client to do some db stuff
+module.exports.setMongoDbo = function(db) { 
+   if (!dbo) dbo = db;
+   //trackingAcct('test1', 10, '+');
+   //trackingAccts([{account: 'test1', amount: 20, sign: '-'},
+   //               {account: 'test2', amount: 20, sign: '+'}]);
+}
 
 // Get linkgear account 
 module.exports.get = function(privateKey, needEncode) {
@@ -61,6 +67,8 @@ module.exports.change = function(oldAccount, oldPrivateKey, newPrivateKey) {
 }
 
 module.exports.getBalance = function(account) {
+   if (!account) return 0.00;
+
    const weiValue = web3.eth.getBalance(account);
    return Math.round(parseFloat(web3.fromWei(weiValue))) * 100 /100;
    //return web3.fromWei(weiValue);
@@ -142,7 +150,25 @@ module.exports.isChecksumAddress = isChecksumAddress;
 //
 
 function trackingAcct(account, amount, sign) {
-   // Trancking down the change to collection translogs
+   if (!dbo) return false;
+  
+   // Trancking down the change to collection translog
+   const myobj = { account: account, amount: amount, sign: sign };
+
+   dbo.collection("translog").insertOne(myobj, function(err, res) {
+       if (err) throw err;
+       return true;
+   });
+}
+
+function trackingAccts(arrAccounts) {
+   if (!dbo) return false;
+
+   // Trancking down the change to collection translog
+   dbo.collection("translog").insertMany(arrAccounts, function(err, res) {
+       if (err) throw err;
+       return true;
+   });
 }
 
 // To get ABI use command: solcjs LinkgearPoSToken.sol --abi
@@ -168,8 +194,9 @@ module.exports.sendRewards = function(toAccount, amount) {
   
    const ownerAccount = linkgearToken.owner();
    // transfer rewards
-   trackingAcct(toAccount, amount, '+');
-   trackingAcct(ownerAccount, amount, '-');
+   trackingAccts([{account: toAccount, amount: amount, sign: '+'},
+                  {account: ownerAccount, amount: amount, sign: '-'}]);
+
    return linkgearToken.transfer(toAccount, amount); // the result will be the transaction hash
 }
 
@@ -181,8 +208,9 @@ module.exports.deductRewards = function(fromAccount, amount) {
    // Owner account
    const ownerAccount = linkgearToken.owner();
    //console.log(`TransferFrom\('${fromAccount}', '${ownerAccount}', ${amount}\)`);
-   trackingAcct(fromAccount, amount, '-');
-   trackingAcct(ownerAccount, amount, '+');
+   trackingAccts([{account: fromAccount, amount: amount, sign: '-'},
+                  {account: ownerAccount, amount: amount, sign: '+'}]);
+
    return linkgearToken.transferFrom(fromAccount, ownerAccount, amount); // the result will be the transaction hash
 }
 
@@ -194,13 +222,14 @@ module.exports.userReward = function(frmAccount, privateKey,toAccount, amount) {
 
    web3.personal.unlockAccount(fromAccount, privateKey);
    //console.log(`linkgearToken.transferFrom(${fromAccount}, ${toAccount}, ${amount}`); 
-   trackingAcct(frmAccount, amount, '-');
-   trackingAcct(toAccount, amount, '+');
+   trackingAccts([{account: frmAccount, amount: amount, sign: '-'},
+                  {account: toAccount, amount: amount, sign: '+'}]);
    return linkgearToken.transferFrom(fromAccount, toAccount, amount) // the result will be the transaction hash
 }
 
 // Get the token balance
 module.exports.getTokenBalance = function(account) {
+   if (!account) return 0.00;
    return parseInt(linkgearToken.balanceOf(account)); 
 }
 
