@@ -4,3 +4,4 @@ ooth.log
 test*
 *.zip
 *.tar
+.node-*
