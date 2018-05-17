@@ -24,8 +24,8 @@ const tests = {
     }
 };
 
-const linkgearaccount = require('./linkgearaccount.js')
-linkgearaccount.web3init();
+const linkgearPOS = require('./linkgearPOS.js')
+linkgearPOS.web3init();
 
 function testValue(key, value) {
     const test = tests[key];
@@ -91,6 +91,7 @@ module.exports = function ({
         registerProfileField('account');
         registerProfileField('snode');
         registerProfileField('createdAt');
+        registerProfileField('userStartTime');
         registerProfileField('dname');
 
         registerPassportMethod('login', requireNotLogged, new LocalStrategy({
@@ -198,27 +199,28 @@ module.exports = function ({
             testValue('password', password);
 
             // Validate the account if an account is passed
-            if (account && !linkgearaccount.isAddress(account))
-                throw new Error(`Invalid Linkgear Account ${account}`);
+            if (account && !linkgearPOS.isAddress(account))
+                throw new Error(`Invalid gegeChain Account ${account}`);
 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
                     throw new Error('This email is already registered.');
                 }
                  
-                // Linkgear Account
-                const linkgearAccount = account? account : 
-                                        linkgearaccount.get(password); 
+                // LinkgearPOS Account
+                const linkgearPOSAccount = account? account : 
+                                           linkgearPOS.createAccount(password); 
 
                 const verificationToken = randomToken();
                 const hashedPassword = hash(password);
                 insertUser({
                     email,
                     password: hashedPassword,
-                    account: linkgearAccount,
+                    account: linkgearPOSAccount,
                     snode: snode,
                     dname: dname,
                     createdAt: new Date(),
+                    userStartTime: Date.now(),
                     verificationToken: hash(verificationToken),
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {
@@ -427,67 +429,115 @@ module.exports = function ({
             return res.send({ message: 'Add for testing', result: result });
         });
         
-        registerMethod('t-getTokenBalance', requireLogged, function (req, res) {
-           const {addr} = req.body; 
-           const result = (addr)? linkgearaccount.getTokenBalance(addr) 
-                               : 0;
-           return res.send({ message: 'Token balance:', result: result });
-        });        
-
-        registerMethod('t-getBalance', requireLogged, function (req, res) {
-           const {account} = req.body; 
-           const result = (account)? linkgearaccount.getBalance(account) 
-                               : 0;
-           return res.send({ message: 'Account balance:', result: result });
-        });        
-        
-        registerMethod('t-deductRewards', requireLogged, function (req, res) {
-            const {addr, amount} = req.body;
-            const result = linkgearaccount.deductRewards(addr, amount);                   
-            return res.send({ message: 'Deduct Rewards', result: result });
+        // Balance of the account
+        // balanceOf(addr)
+        registerMethod('t-balanceOf', requireLogged, function (req, res) {
+            const {account} = req.body
+            const result = linkgearPOS.balanceOf(account); 
+            return res.send({ message: `Get Balance of ${account}`, result: result });
         });
-        
+                
+        // Send rewards to user(publisher)
+        // sendRewards(userAddress,token,superNodeAddress,userStartTime)
         registerMethod('t-sendRewards', requireLogged, function (req, res) {
-            const {addr, amount} = req.body;
-            const result = linkgearaccount.sendRewards(addr, amount);                   
-            return res.send({ message: 'Send Rewards', result: result });
-        });
-        
-        registerMethod('t-userReward', requireLogged, function (req, res) {
-            const { user, password, addr, amount } = req.body;
-            const result = linkgearaccount.userReward(user, password, addr, amount);
-            return res.send({ message: 'User Rewards', result: result });
-        });
-        
-        registerMethod('t-setExchangeRate', requireLogged, function (req, res) {
-            const { rate } = req.body;
-            const result = linkgearaccount.setExchangeRate(rate);
-            return res.send({ message: 'Set Exchange Rate', result: result });
-        });
-        
-        registerMethod('t-getExchangeRate', requireLogged, function (req, res) {
-            const result = linkgearaccount.getExchangeRate();
-            return res.send({ message: 'Get Exchange Rate', result: result });
-        });
-        
-        registerMethod('t-linkgearToToken', requireLogged, function (req, res) {
-            const {addr, key, amount} = req.body;
-            const result = linkgearaccount.linkgearToToken(addr, key, amount);
-            return res.send({ message: 'Linkgear to Token', result: result });
-        });
-        
-        registerMethod('t-redeemToken', requireLogged, function (req, res) {
-            const {addr, amount} = req.body;
-            const result = linkgearaccount.redeemToken(addr, amount);
-            return res.send({ message: 'Redeem Token', result: result });
+            const {token} = req.body;
+ 
+            return getUserById(req.user._id).then(user=> {
+                 const result = linkgearPOS.sendRewards(user.local.account, 
+                                         token,
+                                         user.local.snode, 
+                                         user.local.userStartTime);
+                  return res.send({
+                        message: 'Send rewards to current user', result: result
+                    });
+            });
         });
 
-        registerMethod('t-withdraw', requireLogged, function (req, res) {
-            const {addr, key} = req.body;
-            const result = linkgearaccount.withdraw(addr, key);
-            return res.send({ message: 'Withdraw', result: result });
+        // deduct rewards from user(publisher)
+        // deductRewards(userAddress,token,superNodeAddress,userStartTime) 
+        registerMethod('t-deductRewards', requireLogged, function (req, res) {
+            const {token} = req.body;
+ 
+            return getUserById(req.user._id).then(user=> {
+                 const result = linkgearPOS.deductRewards(user.local.account, 
+                                         token,
+                                         user.local.snode, 
+                                         user.local.userStartTime);
+                  return res.send({
+                        message: 'Deduct rewards from current user', result: result
+                    });
+            });
         });
-        
+
+        // user send token to other user
+        // userSendToken(userAddress,toAddress,token,sNodeAddress,userStartTime)
+        registerMethod('t-userSendToken', requireLogged, function (req, res) {
+            const {toAddress, token} = req.body;
+ 
+            return getUserById(req.user._id).then(user=> {
+                 const result = linkgearPOS.userSendToken(user.local.account, 
+                                         toAddress, token,
+                                         user.local.snode, 
+                                         user.local.userStartTime);
+                  return res.send({
+                       message: 'Current user sends token to other user', result: result
+                    });
+            });
+        });
+
+        // User join POS
+        // joinStake(addr, amount) 
+        registerMethod('t-joinStake', requireLogged, function (req, res) {
+            const {amount} = req.body;
+ 
+            return getUserById(req.user._id).then(user=> {
+               const result = linkgearPOS.joinStake(user.local.account,amount); 
+                  return res.send({
+                        message: 'Current user joins POS', result: result
+                    });
+            });
+        });
+
+        // user add more amount to POS
+        //  addStake(addr, amount)
+        registerMethod('t-addStake', requireLogged, function (req, res) {
+            const {amount} = req.body;
+ 
+            return getUserById(req.user._id).then(user=> {
+                const result = linkgearPOS.addStake(user.local.account,amount); 
+                  return res.send({
+                        message: 'Current user adds more to POS', result: result
+                    });
+            });
+        });
+
+        // user withdraw amount from POS - but remaining amount cannot below 
+        // minmum stake amount
+        //  withdrawStake(addr, amount)
+        registerMethod('t-withdrawStake', requireLogged, function (req, res) {
+            const {amount} = req.body;
+ 
+            return getUserById(req.user._id).then(user=> {
+                 const result = linkgearPOS.withdrawStake(user.local.account, 
+                                         amount);
+                  return res.send({
+                       message: 'Current user withdraws amount from POS', result: result
+                    });
+            });
+        });
+
+        // remove user from POS. The holdered stake amount will add back to 
+        // user's balance
+        // removeStake(addr)
+        registerMethod('t-removeStake', requireLogged, function (req, res) {
+            return getUserById(req.user._id).then(user=> {
+                 const result = linkgearPOS.removeStake(user.local.account); 
+                  return res.send({
+                        message: 'Remove current user from POS', result: result
+                    });
+            });
+        });
+
         // Link the account
         //
         registerMethod('link-account', requireLogged, function (req, res) {
@@ -496,7 +546,7 @@ module.exports = function ({
             if (!typeof account === 'string')
                 throw new Error('Invalid type for account.');
 
-            if (!linkgearaccount.isAddress(account))
+            if (!linkgearPOS.isAddress(account))
                 throw new Error(`Invalid linkgear account ${account}.`);
            
             return getUserById(req.user._id).then(user=> {

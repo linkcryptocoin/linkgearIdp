@@ -21,7 +21,7 @@ const SECRET = 'linkgearsecret'
 const SHARED_SECRET = 'linkgearsharedsecret'
 const OOTH_PATH = '/auth'
 
-const linkgearaccount = require('./linkgearaccount.js')
+const linkgearPOS = require('./linkgearPOS.js')
 
 const cors = require('cors')  
 
@@ -65,10 +65,8 @@ function logging(stream) {
 //////////////////////////////////////////////////
 // This event will be triggered after the ooth login process
 const onAfterOothLogin = function(user) {
-   // The balance pair are dynamical values, which can be changed any time
-   // Load the balances of the account belonging to the user
-   user.local.ligear = linkgearaccount.getBalance(user.local.account);
-   user.local.token  = linkgearaccount.getTokenBalance(user.local.account);
+   // The balance of the user account
+   user.local.balance = linkgearPOS.balanceOf(user.local.account);
 
    console.log(`user profile: ${JSON.stringify(user)}`);
 }
@@ -90,8 +88,8 @@ const start = async () => {
             saveUninitialized: true,
         }))
 
-        // Linkgear Account mongodb instance
-        linkgearaccount.setMongoDbo(db);
+        // LinkgearPOS mongodb instance
+        linkgearPOS.setMongoDbo(db);
 
         const ooth = new Ooth({
             sharedSecret: SHARED_SECRET,

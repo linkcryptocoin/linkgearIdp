@@ -1,34 +1,41 @@
 const linkgearPOS = require('./linkgearPOS.js');
 
-linkgearPOS.init();
+linkgearPOS.web3init();
 
+const accounts = ['0x5909faacedaa8c5a8ee2098bbc3702db026763ef',
+                  '0xe0b14ede829c87a7a5b91bf00faf33f583ba62ba',
+                  '0x28297c31ca42ff7c218ccd2a72fb6e459c1c3d16'];
 // How to use the POStest.js
 // In gligear console, load the script file
 // > loadScript("E:/Project/src/truffle/LinkgearPosToken/test/POStest.js")
 //
 // Send rewards to user(publisher)
-//   > sendRewards(userAddress, token,superNodeAddress,userStartTime)
+//sendRewards(accounts[1],10,'0x',Date.now());
+//sendRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,linkgearPOS.gegeweb3().eth.coinbase,Date.now());
+//sendRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,'0x0',Date.now());
 //
 // deduct rewards from user(publisher)
 //  > deductRewards(userAddress, token,superNodeAddress,userStartTime) 
+//deductRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,linkgearPOS.gegeweb3().eth.coinbase,Date.now());
+//deductRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,'0x0',Date.now());
 //
 // user send token to other user
 //  > userSendToken(userAddress, toAddress, superNodeAddress,userStartTime)
 //
 // Checck Balance of this node
-   linkgearPOS.checkAllBalances()
+   checkAllBalances()
 //
 // User join POS
-//  > joinStake(addr, amount) 
+//  joinStake(linkgearPOS.gegeweb3().eth.accounts[1], 5) 
 // 
 // user add more amount to POS
-//  > addStake(addr, amount)
+//  addStake(linkgearPOS.gegeweb3().eth.accounts[1], 3)
 //
 // user withdraw amount from POS - but remaining amount cannot below minmum stake amount
-//  > withdrawStake(addr, amount)
+//  withdrawStake(linkgearPOS.gegeweb3().eth.accounts[1], 8)
 //
 // remove user from POS. The holdered stake amount will add back to user's balance
-//  > removeStake(addr)
+//   removeStake(linkgearPOS.gegeweb3().eth.accounts[1])
 //
 // get List fo all Stake Holders
 //  > getStakeHolderList()
@@ -46,7 +53,7 @@ linkgearPOS.init();
 // This function shows how to send rewards to user(publisher)
 function sendRewards(userAddress, token,superNodeAddress,userStartTime) {
   // Balance before rewards
-  console.log("   Account " + userAddress + " before rewards balance: " + myPOS.balanceOf(userAddress));
+  console.log("   Account " + userAddress + " before rewards balance: " + linkgearPOS.balanceOf(userAddress));
 
   // transfer rewards
   linkgearPOS.sendRewards(userAddress, token,superNodeAddress,userStartTime);
@@ -59,13 +66,13 @@ function sendRewards(userAddress, token,superNodeAddress,userStartTime) {
 // This function shows how to deduct rewards from user(publisher)
 function deductRewards(userAddress, token,superNodeAddress,userStartTime) {
   // Balance before deduction
-  console.log("   Account " + userAddress + " before deduction balance: " + myPOS.balanceOf(userAddress));
+  console.log("   Account " + userAddress + " before deduction balance: " + linkgearPOS.balanceOf(userAddress));
 
   // deduct rewards
   result = linkgearPOS.deductRewards(userAddress, token,superNodeAddress,userStartTime)  
 
   if (result) {
-    str = JSON.stringify(eth.getTransaction(result), null, 4);
+    str = JSON.stringify(linkgearPOS.gegeweb3().eth.getTransaction(result), null, 4);
     console.log(str);
   }
   
@@ -87,15 +94,8 @@ function userSendToken(userAddress, toAddress,token, superNodeAddress,userStartT
 
 // Check the balances for all the accounts
 function checkAllBalances() {
-  var idx = 0;
-  eth.accounts.forEach( function(acct) {  // 1 ether = 1 ligear
-      console.log("   Account[" + idx + "]:" +
-       acct + " \tbalance: " + linkgearPOS.balanceOf(acct) + 
-       "  token"
-      ); 
-      idx++; 
-  })  
-};
+    linkgearPOS.checkAllBalances();
+}
 
 // User join POS
 function joinStake(addr, amount) {
