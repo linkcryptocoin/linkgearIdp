@@ -13,6 +13,11 @@ var gegeweb3 = new Web3(typeof web3 !== 'undefined'? web3.currentProvider :
 const defaultGas = 8000000;
 const defaultSNode = '0x0';
 
+const takenLimitation = {
+                           oneTime: 400,
+                           daily:   12000,
+                        }
+ 
 console.log(`web3.version used by gegeChain: ${gegeweb3.version.api}`);
 
 module.exports.web3init = function() { }
@@ -60,8 +65,7 @@ const gegePOS = gegeweb3.eth.contract(contractABI).at(contractAddress);
 // Create an account
 module.exports.createAccount = function(privateKey) {
     const account = gegeweb3.personal.newAccount(privateKey);
-    trackingTran({message: `Account ${account} was created`});
-
+    trackingTran({account: account, message: "Account was created"});
     return account;   
 }
 
@@ -72,37 +76,97 @@ function getCoinbaseKey(fake) {
    return keyInput.slice(parseInt(start), parseInt(end));
 }
 
+function getMonday(iDay) {
+    const d = (iDay)? new Date(iDay) : new Date();
+
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day == 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+}
+
+function getSunday(iDay) {
+    const d = (iDay)? new Date(iDay) : new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    return new Date(d.setDate(diff));
+}
+
+function formatISODate(date) {
+    const d = (date)? new Date(date) : new Date();
+    var   month = '' + (d.getMonth() + 1);
+    var   day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-') + "T00:00:00.000Z";
+}
+
 // This function shows how to send rewards to user(publisher)
 module.exports.sendRewards = function(uAddr, token, sAddr, uStart) {
+   const nToken = (typeof token === "string")? parseInt(token) : token;
+   
    // transfer rewards
    if (!sAddr || !isAddress(sAddr)) sAddr = defaultSNode;
    // convert the milliseconds to the seconds
    if (!uStart) uStart = Date.now();
    const timeStamp = Math.floor(uStart / 1000);
+   
+   // Check the taken limitation
+   if (nToken <= 0) // check the amount
+       return {result: false, message: "The token is less or equal to zero"}
 
-   // transfer rewards
-   trackingTran({tcode:"sendRewards", uAddr:uAddr, token:token, sAddr: sAddr, startTime: timeStamp});
-   return gegePOS.sendRewards.sendTransaction(uAddr,token,sAddr,timeStamp,
-                       {from:gegeweb3.eth.coinbase, gas:defaultGas}) 
+   // Check the oneTime limitation
+   if (nToken > takenLimitation.oneTime)
+       return {result: false, message: `Over one time limitation ${takenLimitation.oneTime}`}
+
+   // Check the daily limitation
+   const dateBegin = new Date(formatISODate());  // The beginning of Today
+   const dateEnd = new Date();                   // The current time of Today
+   dbo.collection("translog").aggregate([{$match: {$and: [{tcode: "sendRewards"},{uAddr: uAddr}, {timestamp:{$gte: dateBegin}},{timestamp:{$lt: dateEnd}}]}}, {$group: { _id:null, total: {$sum: "$token"}}}]).toArray(function(err, result) {
+    if (err) throw err;
+ 
+    const overLimit = (result.length > 0 && result[0].total + nToken > takenLimitation.daily)
+
+    if (!oveLimit) {
+        // transfer rewards
+        trackingTran({tcode:"sendRewards", uAddr:uAddr, token:nToken, sAddr: sAddr, startTime: timeStamp});
+        const result = gegePOS.sendRewards.sendTransaction(uAddr,token,sAddr,timeStamp,
+                                  {from:gegeweb3.eth.coinbase, gas:defaultGas}) 
+        return {result: true, message: `Send rewards to current user ${token}`};
+    }
+    else
+        return {result: false, message: "Over daily limitation"};
+    
+   });    
 }
 
 // This function shows how to deduct rewards from user(publisher)
 module.exports.deductRewards = function(uAddr,token,sAddr,uStart) {
+    const nToken = (typeof token === "string")? parseInt(token) : token;
+    if (nToken <= 0) return false;
+
     if (!sAddr || !isAddress(sAddr)) sAddr = defaultSNode;
     // convert the milliseconds to the seconds
     if (!uStart) uStart = Date.now();
     const timeStamp = Math.floor(uStart / 1000);
-   trackingTran({tcode:"deductewards", uAddr:uAddr, token:token, sAddr: sAddr, startTime: timeStamp});
+ 
+  trackingTran({tcode:"deductewards", uAddr:uAddr, token:nToken, sAddr: sAddr, startTime: timeStamp});
     return gegePOS.deductRewards(uAddr, token, sAddr, timeStamp)  
 }
 
 // This function shows how a user can send rewards publisher
 module.exports.userSendToken = function(uAddr,toAddr,token,sAddr,uStart) {
+    const nToken = (typeof token === "string")? parseInt(token) : token;
+    if (nToken <= 0) return false;
+
     if (!sAddr || !isAddress(sAddr)) sAddr = defaultSNode;
     // convert the milliseconds to the seconds
     if (!uStart) uStart = Date.now();
     const timeStamp = Math.floor(uStart / 1000);
-   trackingTran({tcode:"userSendToken", uAddr:uAddr, toAddr:toAddr, token:token, sAddr: sAddr, startTime: timeStamp});
+
+   trackingTran({tcode:"userSendToken", uAddr:uAddr, toAddr:toAddr, token:nToken, sAddr: sAddr, startTime: timeStamp});
     return gegePOS.userSendToken(uAddr,toAddr,token,sAddr,timeStamp)
 }
 

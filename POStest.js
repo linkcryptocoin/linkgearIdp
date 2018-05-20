@@ -12,11 +12,11 @@ const accounts = ['0x5909faacedaa8c5a8ee2098bbc3702db026763ef',
 // Send rewards to user(publisher)
 //sendRewards(accounts[1],10,'0x',Date.now());
 //sendRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,linkgearPOS.gegeweb3().eth.coinbase,Date.now());
-//sendRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,'0x0',Date.now());
+sendRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,'0x0',Date.now());
 //
 // deduct rewards from user(publisher)
 //  > deductRewards(userAddress, token,superNodeAddress,userStartTime) 
-//deductRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,linkgearPOS.gegeweb3().eth.coinbase,Date.now());
+deductRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,linkgearPOS.gegeweb3().eth.coinbase,Date.now());
 //deductRewards(linkgearPOS.gegeweb3().eth.accounts[1],10,'0x0',Date.now());
 //
 // user send token to other user
