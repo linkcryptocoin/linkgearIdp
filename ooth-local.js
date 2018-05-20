@@ -242,13 +242,13 @@ module.exports = function ({
         registerMethod('generate-verification-token', requireRegisteredWithThis, function (req, res) {
             const verificationToken = randomToken();
 
-            const user = req.user;
+            const {user} = req.body;
 
             if (!user[name] || !user[name].email) {
                 throw new Error('No email to verify');
             }
 
-            return updateUser(req.user._id, {
+            return updateUser(user._id, {
                 verificationToken: hash(verificationToken),
                 verificationTokenExpiresAt: new Date(Date.now() + HOUR)
             }).then(() => {
@@ -440,15 +440,16 @@ module.exports = function ({
         // Send rewards to user(publisher)
         // sendRewards(userAddress,token,superNodeAddress,userStartTime)
         registerMethod('t-sendRewards', requireLogged, function (req, res) {
-            const {token} = req.body;
+            const {userId, token} = req.body;
  
-            return getUserById(req.user._id).then(user=> {
-                 const result = linkgearPOS.sendRewards(user.local.account, 
+            return getUserById(userId).then(user=> {
+                 const {result, message} = linkgearPOS.sendRewards(
+                                         user.local.account, 
                                          token,
                                          user.local.snode, 
                                          user.local.userStartTime);
                   return res.send({
-                        message: 'Send rewards to current user', result: result
+                        message: message, result: result
                     });
             });
         });
@@ -456,9 +457,9 @@ module.exports = function ({
         // deduct rewards from user(publisher)
         // deductRewards(userAddress,token,superNodeAddress,userStartTime) 
         registerMethod('t-deductRewards', requireLogged, function (req, res) {
-            const {token} = req.body;
+            const {userId, token} = req.body;
  
-            return getUserById(req.user._id).then(user=> {
+            return getUserById(userId).then(user=> {
                  const result = linkgearPOS.deductRewards(user.local.account, 
                                          token,
                                          user.local.snode, 
@@ -472,9 +473,9 @@ module.exports = function ({
         // user send token to other user
         // userSendToken(userAddress,toAddress,token,sNodeAddress,userStartTime)
         registerMethod('t-userSendToken', requireLogged, function (req, res) {
-            const {toAddress, token} = req.body;
+            const {userId, toAddress, token} = req.body;
  
-            return getUserById(req.user._id).then(user=> {
+            return getUserById(userId).then(user=> {
                  const result = linkgearPOS.userSendToken(user.local.account, 
                                          toAddress, token,
                                          user.local.snode, 
@@ -488,9 +489,9 @@ module.exports = function ({
         // User join POS
         // joinStake(addr, amount) 
         registerMethod('t-joinStake', requireLogged, function (req, res) {
-            const {amount} = req.body;
+            const {userId, amount} = req.body;
  
-            return getUserById(req.user._id).then(user=> {
+            return getUserById(userId).then(user=> {
                const result = linkgearPOS.joinStake(user.local.account,amount); 
                   return res.send({
                         message: 'Current user joins POS', result: result
@@ -501,9 +502,9 @@ module.exports = function ({
         // user add more amount to POS
         //  addStake(addr, amount)
         registerMethod('t-addStake', requireLogged, function (req, res) {
-            const {amount} = req.body;
+            const {userId, amount} = req.body;
  
-            return getUserById(req.user._id).then(user=> {
+            return getUserById(userId).then(user=> {
                 const result = linkgearPOS.addStake(user.local.account,amount); 
                   return res.send({
                         message: 'Current user adds more to POS', result: result
@@ -515,9 +516,9 @@ module.exports = function ({
         // minmum stake amount
         //  withdrawStake(addr, amount)
         registerMethod('t-withdrawStake', requireLogged, function (req, res) {
-            const {amount} = req.body;
+            const {userId, amount} = req.body;
  
-            return getUserById(req.user._id).then(user=> {
+            return getUserById(userId).then(user=> {
                  const result = linkgearPOS.withdrawStake(user.local.account, 
                                          amount);
                   return res.send({
@@ -530,7 +531,9 @@ module.exports = function ({
         // user's balance
         // removeStake(addr)
         registerMethod('t-removeStake', requireLogged, function (req, res) {
-            return getUserById(req.user._id).then(user=> {
+            const {userId} = reg.body;
+
+            return getUserById(userId).then(user=> {
                  const result = linkgearPOS.removeStake(user.local.account); 
                   return res.send({
                         message: 'Remove current user from POS', result: result
@@ -541,7 +544,7 @@ module.exports = function ({
         // Link the account
         //
         registerMethod('link-account', requireLogged, function (req, res) {
-            const { account } = req.body;
+            const { userId, account } = req.body;
             
             if (!typeof account === 'string')
                 throw new Error('Invalid type for account.');
@@ -549,7 +552,7 @@ module.exports = function ({
             if (!linkgearPOS.isAddress(account))
                 throw new Error(`Invalid linkgear account ${account}.`);
            
-            return getUserById(req.user._id).then(user=> {
+            return getUserById(userId).then(user=> {
                 updateUser(user._id, {
                     account: account
                 }).then(() => {
@@ -568,7 +571,7 @@ module.exports = function ({
         });        
 
         registerMethod('change-password', requireLogged, function (req, res) {
-            const { password, newPassword } = req.body;
+            const { userId, password, newPassword } = req.body;
 
             if (!typeof password === 'string') {
                 throw new Error('Invalid password.');
@@ -576,7 +579,7 @@ module.exports = function ({
 
             testValue('password', newPassword);
 
-            return getUserById(req.user._id).then(user => {
+            return getUserById(userId).then(user => {
                 if ((password || user[name] && user[name].password) && !compareSync(password, user[name].password)) {
                     throw new Error('Incorrect password.');
                 }

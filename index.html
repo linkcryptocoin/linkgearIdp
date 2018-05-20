@@ -57,15 +57,18 @@
             async function onGenerateVerificationToken(e) {
                 //alert("onGeneareVerificationToken");
                 e.preventDefault()
-                const user = await getUser()
+                var user = await getUser()
                 //alert("name: " + user.local.email);
-                const ouser = {_id: user._id, name: {email: user.local.email}}
+                user.name = user.local.email;
+
                 const res = await fetch('/auth/local/generate-verification-token', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    user: ouser,
+                    body: JSON.stringify({
+                        user,
+                    }),
                     credentials: 'include',
                 })
                 const body = await res.json()
@@ -151,14 +154,15 @@
                 const user = await getUser()
                 const account = document.getElementById('linkaccount-account').value;
 
+                const userId = user._id;
                 alert(`account=${account}`)
                 const res = await fetch('/auth/local/link-account', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    user: {_id : user._id},
                     body: JSON.stringify({
+                          userId,
                           account,
                     }),
                     credentials: 'include',
@@ -189,14 +193,15 @@
             async function onDeductRewards(e) {
                 e.preventDefault();
                 const user = await getUser()
+                const userId = user._id;
                 const token = document.getElementById('sc-deduct-token').value;
                 const res = await fetch('/auth/local/t-deductRewards', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    user: {_id : user._id},
                     body: JSON.stringify({
+                          userId,
                           token,
                     }),
                     credentials: 'include',
@@ -209,14 +214,15 @@
             async function onSendRewards(e) {
                 e.preventDefault();
                 const user = await getUser()
+                const userId = user._id;  
                 const token = document.getElementById('sc-send-token').value;
                 const res = await fetch('/auth/local/t-sendRewards', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    user: {_id : user._id},
                     body: JSON.stringify({
+                          userId,
                           token,
                     }),
                     credentials: 'include',
@@ -229,6 +235,7 @@
             async function onUserReward(e) {
                 e.preventDefault();
                 const user = await getUser()
+                const userId = user._id; 
                 const toAddress = document.getElementById('sc-user-addr').value;
                 const token = document.getElementById('sc-user-token').value;
                 const res = await fetch('/auth/local/t-userSendToken', {
@@ -236,8 +243,8 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    user: {_id : user._id},
                     body: JSON.stringify({
+                          userId,
                           toAddress,
                           token,
                     }),
@@ -252,6 +259,7 @@
                 alert("onChangePassword");
                 e.preventDefault();
                 const user = await getUser()
+                const userId = user._id;
                 const password = document.getElementById('changepassword-old').value;
                 const newPassword = document.getElementById('changepassword-new').value;
 
@@ -261,8 +269,8 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    user: {_id : user._id},
                     body: JSON.stringify({
+                          userId,
                           password,
                           newPassword,
                     }),
