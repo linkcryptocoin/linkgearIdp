@@ -103,7 +103,6 @@ function formatISODate(date) {
     return [year, month, day].join('-') + "T00:00:00.000Z";
 }
 
-// This function shows how to send rewards to user(publisher)
 module.exports.sendRewards = function(uAddr, token, sAddr, uStart) {
    const nToken = (typeof token === "string")? parseInt(token) : token;
    
