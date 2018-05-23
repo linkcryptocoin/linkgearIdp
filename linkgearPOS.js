@@ -7,7 +7,7 @@ const fs = require('fs');
 const Web3 = require('web3');
 //const web3url = "http://127.0.0.1:8501";
 const web3url = "http://172.31.83.105:8501";
-var gegeweb3 = new Web3(typeof web3 !== 'undefined'? web3.currentProvider : 
+var gegeweb3 = new Web3(typeof gegeweb3 !== 'undefined'? gegeweb3.currentProvider : 
                                new Web3.providers.HttpProvider(web3url));
 
 const defaultGas = 8000000;
@@ -17,10 +17,18 @@ const takenLimitation = {
                            oneTime: 400,
                            daily:   12000,
                         }
- 
-console.log(`web3.version used by gegeChain: ${gegeweb3.version.api}`);
 
-module.exports.web3init = function() { }
+// Check the connectivity
+if (gegeweb3.isConnected()) 
+   console.log(`web3.version used by gegeChain: ${gegeweb3.version.api}`);
+
+module.exports.web3init = function(rpcUrl) { 
+   if (rpcUrl) {
+       gegeweb3 = new Web3.providers.HttpProvider(rpcUrl);
+       if (gegeweb3.isConnected()) 
+           console.log(`web3 gegeChain connected: ${gegeweb3.version.api}`);
+   }
+}
 
 module.exports.gegeweb3 = function() { return gegeweb3;}
 

@@ -27,6 +27,7 @@ const linkgearPOS = require('./linkgearPOS.js')  // Linkgear
 
 //////////////////////////////////////////////////////
 var PORT      = 8091    // Ddefault running port
+//var rpcUrl    = "";     // RPC connected to the gegeNode
 var qadb      = false;  // QA Database flag
 var httpsRun  = false;  // https or http, default is http
 var nocors    = false;  // no cors(Cross Original Resource Share) checking
@@ -44,6 +45,9 @@ process.argv.forEach(function (val, index, array) {
       nocors  = true;
    else if (/^(-{1,2}[h|H][t|T]{2}[p|P][s|S])$/.test(val))
       httpsRun = true;
+   else if (/^(-{1,2}[r|R][p|P][c|C][u|U][r|R][l|L])$/.test(prearg)) {	
+      linkgearPOS.web3init(val);
+   }
    else if (/^(-{1,2}[n|N][o|O][l|L][o|O][g|G])$/.test(val))
       noLogging = true;
 
