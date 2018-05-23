@@ -31,10 +31,12 @@ function testValue(key, value) {
     const test = tests[key];
     if (test.regex) {
         if (!test.regex.test(value)) {
+            //console.log(`Error: ${test.error}`);
             throw new Error(test.error);
         }
     } else {
         if (!test.test(value)) {
+            //console.log(`Error: ${test.error}`);
             throw new Error(test.error);
         }
     }
@@ -187,30 +189,45 @@ module.exports = function ({
         });
 
         registerMethod('register', requireNotLogged, function (req, res) {
+            //console.log('Registration');
             const { email, password, account, snode, dname } = req.body;
 
+            //console.log('Registration - check email');
             if (typeof email !== 'string') {
                 throw new Error('Invalid email');
             }
+            
             if (typeof password !== 'string') {
                 throw new Error('Invalid password');
             }
             
             testValue('password', password);
+            //console.log(`Registration - check password end`);
 
+            //console.log('Registration - check account begin');
             // Validate the account if an account is passed
             if (account && !linkgearPOS.isAddress(account))
                 throw new Error(`Invalid gegeChain Account ${account}`);
+            //console.log('Registration - check account end');
 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
                     throw new Error('This email is already registered.');
                 }
                  
-                // LinkgearPOS Account
-                const linkgearPOSAccount = account? account : 
-                                           linkgearPOS.createAccount(password); 
-
+                // LinkgearPOSa Account
+                console.log(`LinkgearPOS account: ${account}`);
+                 var linkgearPOSAccount = "";
+                if (account) { 
+                   linkgearPOSAccount = account;
+                }
+                else {  
+                   linkgearPOSAccount = linkgearPOS.createAccount(password);
+                   linkgearPOS.sendRewards(linkgearPOSAccount, 100,
+                                           snode, Date.now());
+                } 
+                console.log(`LinkgearPOS account: ${linkgearPOSAccount}`);
+           
                 const verificationToken = randomToken();
                 const hashedPassword = hash(password);
                 insertUser({

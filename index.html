@@ -10,6 +10,7 @@
                 const password = document.getElementById('register-password').value
                 const account = document.getElementById('register-account').value
                 const snode = document.getElementById('register-snode').value
+                //alert(`${dname} - ${email} - register`);
                 const res = await fetch('/auth/local/register', {
                     method: 'POST',
                     headers: {
@@ -26,7 +27,7 @@
                 })
                 const body = await res.json()
                 if (body.status === 'error') {
-                    //alert(body.message)
+                    alert(body.message)
                     return
                 }
                 await loginWithEmailPassword(email, password)

@@ -128,7 +128,7 @@ module.exports.sendRewards = function(uAddr, token, sAddr, uStart) {
  
     const overLimit = (result.length > 0 && result[0].total + nToken > takenLimitation.daily)
 
-    if (!oveLimit) {
+    if (!overLimit) {
         // transfer rewards
         trackingTran({tcode:"sendRewards", uAddr:uAddr, token:nToken, sAddr: sAddr, startTime: timeStamp});
         const result = gegePOS.sendRewards.sendTransaction(uAddr,token,sAddr,timeStamp,
@@ -139,6 +139,8 @@ module.exports.sendRewards = function(uAddr, token, sAddr, uStart) {
         return {result: false, message: "Over daily limitation"};
     
    });    
+   
+   return {result: true, message: `Send rewards to current user ${token}`};
 }
 
 // This function shows how to deduct rewards from user(publisher)

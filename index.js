@@ -3,31 +3,33 @@ const express = require('express')
 const session = require('express-session')
 const {promisify} = require('util')
 const Ooth = require('ooth')
-const oothLocal = require('./ooth-local.js')
 const OothMongo = require('ooth-mongo')
 const https = require('https')
 const fs = require('fs')
+const OOTH_PATH = '/auth'
+const cors = require('cors')  
+
+const MONGO_HOST_QA = 'mongodb://34.238.58.243:27017'
 const MONGO_HOST_LOCAL = 'mongodb://localhost:27017'
 const HOST_LOCAL = 'https://localhost'
 const HOST_LOCALN = 'http://localhost'
 //const PORT = 3000
-const MONGO_HOST = 'mongodb://172.31.83.105:32786'
+//const MONGO_HOST = 'mongodb://172.31.83.105:32786'
 const MONGO_DB = 'linkgear'
 const HOST = 'https://172.31.83.105'
 const HOSTN = 'http://172.31.83.105'
 //const PORT = 8091
-var PORT = 8091
 const SECRET = 'linkgearsecret'
 const SHARED_SECRET = 'linkgearsharedsecret'
-const OOTH_PATH = '/auth'
 
-const linkgearPOS = require('./linkgearPOS.js')
-
-const cors = require('cors')  
+const oothLocal = require('./ooth-local.js')  // Linkgear
+const linkgearPOS = require('./linkgearPOS.js')  // Linkgear
 
 //////////////////////////////////////////////////////
-var localRun = false;  // Local run flag
-var httpsRun = false;  // https or http, default is http
+var PORT      = 8091    // Ddefault running port
+var qadb      = false;  // QA Database flag
+var httpsRun  = false;  // https or http, default is http
+var nocors    = false;  // no cors(Cross Original Resource Share) checking
 var noLogging = false;  // Logging control
 // Get the port number if provided in the arguments
 var prearg = "";
@@ -36,8 +38,10 @@ process.argv.forEach(function (val, index, array) {
    if (/^(-{1,2}[p|P][o|O][r|R][t|T])$/.test(prearg) && !isNaN(val)) {
       PORT = val;
    }  
-   else if (/^(-{1,2}[l|L][o|O][c|C][a|A][l|L])$/.test(val))
-      localRun = true;
+   else if (/^(-{1,2}[q|Q][a|A][d|D][b|B])$/.test(val))
+      qadb = true;
+   else if (/^(-{1,2}[n|N][o|O][c|C][o|O][r|R][s|S])$/.test(val))
+      nocors  = true;
    else if (/^(-{1,2}[h|H][t|T]{2}[p|P][s|S])$/.test(val))
       httpsRun = true;
    else if (/^(-{1,2}[n|N][o|O][l|L][o|O][g|G])$/.test(val))
@@ -68,18 +72,22 @@ const onAfterOothLogin = function(user) {
    // The balance of the user account
    user.local.balance = linkgearPOS.balanceOf(user.local.account);
 
-   console.log(`user profile: ${JSON.stringify(user)}`);
+   //console.log(`user profile: ${JSON.stringify(user)}`);
 }
 /////////////////////////////////////////////////
 
 const start = async () => {
     try {
-        const client = await MongoClient.connect(localRun? MONGO_HOST_LOCAL : MONGO_HOST)
+        const client = await MongoClient.connect(qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL)
         const db = client.db(MONGO_DB)
-    
+        console.log(`Start ${qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL}`);
+
         const app = express()
         //app.use(cors())
-        app.use(cors({credentials: true, origin: true}))
+        if (nocors) {
+           app.use(cors({credentials: true, origin: true}))
+        }
+        console.log(`cors checking mode: ${!nocors}`);
 
         app.use(session({
             name: 'api-session-id',
@@ -104,12 +112,12 @@ const start = async () => {
                 logging(`${email}/${_id} registered`)
             },
             onGenerateVerificationToken({email, verificationToken}) {
-                console.log(`${email} requested a verification ${verificationToken}.`)
-                logging(`${email} requested a verification ${verificationToken}.`)
+                //console.log(`${email} requested a verification ${verificationToken}.`)
+                //logging(`${email} requested a verification ${verificationToken}.`)
             },
             onVerify({email, _id}) {
-                console.log(`${_id} verified a generate-verification token`)
-                logging(`${_id} verified a generate-verification token`)
+                //console.log(`${_id} verified a generate-verification token`)
+                //logging(`${_id} verified a generate-verification token`)
             },
             onForgotPassword({email, passwordResetToken, _id}) {
                 console.log(`${email}/${_id} forgot its password, here is the token: ${passwordResetToken}`)
@@ -142,10 +150,10 @@ const start = async () => {
                          }, app)
 
              await new Promise(resolve => server.listen(PORT, resolve));
-             console.log(`Online at ${localRun?HOST_LOCAL:HOST}:${PORT}`);
+             console.log(`Online at ${HOST_LOCAL}:${PORT}`);
         } else { 
              await promisify(app.listen)(PORT) 
-             console.log(`Online at ${localRun?HOST_LOCALN:HOSTN}:${PORT}`);
+             console.log(`Online at ${HOST_LOCALN}:${PORT}`);
         }
     } catch (e) {
         console.error(e)
