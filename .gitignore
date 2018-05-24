@@ -5,3 +5,5 @@ test*
 *.zip
 *.tar
 .node-*
+yarn.lock
+node_modules/
