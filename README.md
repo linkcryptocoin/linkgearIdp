@@ -5,7 +5,7 @@
 3) linkgearPOS.js is used for linkgear gegeChain account creation and web3 service
 4) ooth-local.js - a customizing and enhanced version for linkgear Idp and api
 5) the collection "users" is stored on an mongodb(mongo --port 27017 by default)
-6_ the collection "translog" is used for tracking all the token transaction and account activity
+6) the collection "translog" is used for tracking all the token transaction and account activity
 
 ## api included
 1) user management: login, register, status/profile 
