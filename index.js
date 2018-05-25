@@ -87,10 +87,16 @@ const start = async () => {
         console.log(`Start ${qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL}`);
 
         const app = express()
-        //app.use(cors())
-        if (nocors) {
-           app.use(cors({credentials: true, origin: true}))
+        var corsOptions = {
+           origin: /linkcryptocoin\.com*|linkgear\.net*/,
+           credentials: true
         }
+        if (nocors) {
+           corsOptions.origin = true
+        }
+           
+        //app.use(cors())
+        app.use(cors(corsOptions))
         console.log(`cors checking mode: ${!nocors}`);
 
         app.use(session({
