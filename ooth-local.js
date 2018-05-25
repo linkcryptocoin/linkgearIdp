@@ -94,6 +94,7 @@ module.exports = function ({
         registerProfileField('snode');
         registerProfileField('createdAt');
         registerProfileField('userStartTime');
+        registerProfileField('logInTime'); // Changed each log-on
         registerProfileField('dname');
 
         registerPassportMethod('login', requireNotLogged, new LocalStrategy({
@@ -238,6 +239,7 @@ module.exports = function ({
                     dname: dname,
                     createdAt: new Date(),
                     userStartTime: Date.now(),
+                    logInTime: Date.now(),
                     verificationToken: hash(verificationToken),
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {

@@ -72,10 +72,50 @@ function logging(stream) {
 
 //////////////////////////////////////////////////
 // This event will be triggered after the ooth login process
+var userDb = null;
 const onAfterOothLogin = function(user) {
    // The balance of the user account
    user.local.balance = linkgearPOS.balanceOf(user.local.account);
 
+   const oldLogInTime = (user.local.logInTime)? user.local.logInTime : 0;
+   // Return value: The number of milliseconds between midnight, 01/01/1970 
+   // and the current date and time.  Update the user logIn time
+   const newLogInTime = Date.now();
+
+   var diffSS = Math.round((newLogInTime - oldLogInTime) / 1000)
+   var diffMM = (diffSS >= 60)? Math.floor(diffSS / 60) : 0;
+   var diffHH = (diffMM >= 60)? Math.floor(diffMM / 60) : 0;
+   const diffDD = (diffHH >= 24)? Math.floor(diffHH / 24) : 0;
+   var lastLogIn = "";
+   if (diffDD < 1000) {
+      if (diffDD > 0) {
+          diffHH -= diffDD * 24;
+          lastLogIn += `${diffDD} day(s)`;
+      }
+      if (diffHH > 0) {
+          diffMM -= diffHH * 60;
+          lastLogIn += `${diffHH} hour(s)`;
+      } 
+      if (diffMM > 0) {
+         diffSS -= diffMM * 60;
+         lastLogIn += `${diffMM} min(s)`;
+      } 
+      if (diffSS > 0) {
+          lastLogIn += `${diffSS} sec(s)`;
+      }
+   } else {
+      lastLogIn = "<New User>" 
+   }
+
+   const updLogInTime = { $set: { "local.logInTime": newLogInTime } };
+   userDb.collection("users").updateOne({_id:ObjectId(user._id)}, updLogInTime, 
+      function(err, res) {
+       if (err) throw err;
+       console.log(`user ${user.local.dname} logged on after ${lastLogIn} since last time`)
+   });
+   user.local.logInTime = newLogInTime;
+   
+   //console.log(`user profile: ${JSON.stringify(user)}`);
    //console.log(`user profile: ${JSON.stringify(user)}`);
 }
 /////////////////////////////////////////////////
@@ -85,6 +125,7 @@ const start = async () => {
         const client = await MongoClient.connect(qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL)
         const db = client.db(MONGO_DB)
         console.log(`Start ${qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL}`);
+        userDb = db;
 
         const app = express()
         var corsOptions = {
