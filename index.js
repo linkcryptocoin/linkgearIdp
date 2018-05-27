@@ -24,14 +24,14 @@ const SHARED_SECRET = 'linkgearsharedsecret'
 
 const oothLocal = require('./ooth-local.js')  // Linkgear
 const linkgearPOS = require('./linkgearPOS.js')  // Linkgear
+const bProd = (linkgearPOS.getSysChar() === 'P')
 
 //////////////////////////////////////////////////////
 var PORT      = 8091    // Ddefault running port
-//var rpcUrl    = "";     // RPC connected to the gegeNode
-var qadb      = false;  // QA Database flag
-var httpsRun  = false;  // https or http, default is http
-var nocors    = false;  // no cors(Cross Original Resource Share) checking
-var noLogging = false;  // Logging control
+var qadb      = !bProd  // QA Database flag
+var httpsRun  = false   // https or http, default is http
+var nocors    = !bProd  // no cors(Cross Original Resource Share) checking
+var noLogging = !bProd  // Logging control
 // Get the port number if provided in the arguments
 var prearg = "";
 process.argv.forEach(function (val, index, array) {
@@ -45,9 +45,6 @@ process.argv.forEach(function (val, index, array) {
       nocors  = true;
    else if (/^(-{1,2}[h|H][t|T]{2}[p|P][s|S])$/.test(val))
       httpsRun = true;
-   else if (/^(-{1,2}[r|R][p|P][c|C][u|U][r|R][l|L])$/.test(prearg)) {	
-      linkgearPOS.web3init(val);
-   }
    else if (/^(-{1,2}[n|N][o|O][l|L][o|O][g|G])$/.test(val))
       noLogging = true;
 
@@ -72,52 +69,25 @@ function logging(stream) {
 
 //////////////////////////////////////////////////
 // This event will be triggered after the ooth login process
-var userDb = null;
 const onAfterOothLogin = function(user) {
+   //console.log(`user profile: ${JSON.stringify(user)}`);
+   
    // The balance of the user account
    user.local.balance = linkgearPOS.balanceOf(user.local.account);
 
-   const oldLogInTime = (user.local.logInTime)? user.local.logInTime : 0;
    // Return value: The number of milliseconds between midnight, 01/01/1970 
    // and the current date and time.  Update the user logIn time
    const newLogInTime = Date.now();
 
-   var diffSS = Math.round((newLogInTime - oldLogInTime) / 1000)
-   var diffMM = (diffSS >= 60)? Math.floor(diffSS / 60) : 0;
-   var diffHH = (diffMM >= 60)? Math.floor(diffMM / 60) : 0;
-   const diffDD = (diffHH >= 24)? Math.floor(diffHH / 24) : 0;
-   var lastLogIn = "";
-   if (diffDD < 1000) {
-      if (diffDD > 0) {
-          diffHH -= diffDD * 24;
-          lastLogIn += `${diffDD} day(s)`;
-      }
-      if (diffHH > 0) {
-          diffMM -= diffHH * 60;
-          lastLogIn += `${diffHH} hour(s)`;
-      } 
-      if (diffMM > 0) {
-         diffSS -= diffMM * 60;
-         lastLogIn += `${diffMM} min(s)`;
-      } 
-      if (diffSS > 0) {
-          lastLogIn += `${diffSS} sec(s)`;
-      }
-   } else {
-      lastLogIn = "<New User>" 
-   }
+   const lastLogIn = linkgearPOS.trackLogInTime(ObjectId(user._id),newLogInTime)
+   if (user.local.logInTime)
+       console.log(`user ${user.local.dname} recently logged on time: ${Date(user.local.logInTime)}`);
+   else 
+       console.log(`user ${user.local.dname} is a new user`);
 
-   const updLogInTime = { $set: { "local.logInTime": newLogInTime } };
-   userDb.collection("users").updateOne({_id:ObjectId(user._id)}, updLogInTime, 
-      function(err, res) {
-       if (err) throw err;
-       console.log(`user ${user.local.dname} logged on after ${lastLogIn} since last time`)
-   });
    user.local.logInTime = newLogInTime;
-   
-   //console.log(`user profile: ${JSON.stringify(user)}`);
-   //console.log(`user profile: ${JSON.stringify(user)}`);
 }
+
 /////////////////////////////////////////////////
 
 const start = async () => {
@@ -125,7 +95,6 @@ const start = async () => {
         const client = await MongoClient.connect(qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL)
         const db = client.db(MONGO_DB)
         console.log(`Start ${qadb? MONGO_HOST_QA: MONGO_HOST_LOCAL}`);
-        userDb = db;
 
         const app = express()
         var corsOptions = {
