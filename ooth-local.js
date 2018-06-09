@@ -472,6 +472,22 @@ module.exports = function ({
                     });
             });
         });
+        
+        // userAction(uAddr, sAddr, uStart, app, action) 
+        registerMethod('t-userAction', requireLogged, function (req, res) {
+            const {userId, app, action} = req.body;
+ 
+            return getUserById(userId).then(user=> {
+                 const {result, message} = linkgearPOS.userAction(
+                                         user.local.account, 
+                                         user.local.snode, 
+                                         user.local.userStartTime, 
+                                         app, action);
+                  return res.send({
+                        message: message, result: result
+                    });
+            });
+        });
 
         // deduct rewards from user(publisher)
         // deductRewards(userAddress,token,superNodeAddress,userStartTime) 

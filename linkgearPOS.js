@@ -1,4 +1,4 @@
-// linkgearPOS -- gegeChain operation 
+
 // Author: Simon Li
 // Date: May 17, 2018
 // LinkGear Fundation, all  rights reserved
@@ -430,3 +430,85 @@ function isChecksumAddress(address) {
 };
 
 module.exports.isAddress = isAddress;
+
+module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
+   // transfer rewards
+   if (!sAddr || !isAddress(sAddr)) sAddr = defaultSNode;
+   // convert the milliseconds to the seconds
+   if (!uStart) uStart = Date.now();
+   const timeStamp = Math.floor(uStart / 1000);
+   
+   var ret;
+   switch(app.toLowerCase()) {
+      case 'chainpage':
+          ret = handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase()); 
+          break;
+
+      case 'chainpost':
+          ret = handleChainPost(uAddr, sAddr, timeStamp, action.toLowerCase()); 
+          break;
+ 
+      default:
+          throw `the application ${app} is not supported yet`;
+   }
+   return ret;
+}
+
+// Handle the ChainPage request
+function handleChainPage(uAddr, sAddr, uStart, action) {
+    var takenAwayToken = 0;
+    switch(action) {
+       case 'comment':
+          takenAwayToken = 5;
+          break;
+       case 'like':
+          takenAwayToken = 5;
+          break;
+       case 'dislike':
+          takenAwayToken = 10;
+          breal;
+       default: 
+          throw `ChainPage: "${action}" not supported`;  
+   }
+   
+   // tracking the deduction
+   //trackingTran({app:"ChainPage",tcode:action,uAddr:uAddr,token:takenAwayToken,startTime:uStart});
+
+   return {result: gegePOS.deductRewards(uAddr, takenAwayToken, sAddr, uStart),
+           message: `ChainPage "${action}" was completed in gegeChain`};
+} 
+
+// Handle the ChainPost request
+function handleChainPost(uAddr, sAddr, uStart, action) {
+   var rule = {rewardToken: 0, limitPerDay: 0}; 
+   switch(action) {
+      case 'login':
+         rule = {rewardToken: 10, limitPerDay: 1}; break;
+      case 'post':
+         rule = {rewardToken: 20, limitPerDay: 5}; break;
+      case 'comment':
+         rule = {rewardToken: 20, limitPerDay: 5}; break;
+      case 'like':
+         rule = {rewardToken: 5, limitPerDay: 10}; break;
+      case 'dislike':
+         rule = {rewardToken: 5, limitPerDay: 10}; break;
+      default: 
+         throw `ChainPost: "${action}" not supported`;  
+   }
+     
+   // Check the daily limitation
+   const dateEnd = new Date();   // current time
+   const dateBegin = new Date(formatISODate());  // The beginning of Today
+   
+   dbo.collection("translog").count({$and: [{app:"ChainPost"},{tcode:action},{uAddr:uAddr},{timestamp:{$gte:dateBegin}},{timestamp:{$lt: dateEnd}}]}, function(err, res) {
+        if (err) throw err;
+        if (res >= rule.limitPerDay) 
+           return {result: false, message: `ChainPost "${action}" reward: reacah the daily limitation`}; 
+
+        // transfer rewards
+        trackingTran({app:"ChainPost", tcode:action,uAddr:uAddr,token:rule.rewardToken,timestamp:uStart});
+        return {result: gegePOS.sendRewards(uAddr,rule.rewardToken,sAddr,uStart),                message: `ChainPost "${action}" was completed in gegeChain`};
+   });
+
+   return {result: true, message: "Async running, please wait or refresh"};
+}
