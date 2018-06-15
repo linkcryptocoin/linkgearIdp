@@ -1,4 +1,5 @@
 .dummyKey
+*.csv
 ooth.log
 *error*.log
 test*
