@@ -149,6 +149,19 @@ module.exports.getSysChar = function() {
     return getSysChar1();
 }
 
+module.exports.directlySendRewards = function(uAddr, token, sAddr, uStart) {
+   const nToken = (typeof token === "string")? parseInt(token) : token;
+   if (nToken < 0) return false;
+   
+   // transfer rewards
+   if (!sAddr || !isAddress(sAddr)) sAddr = defaultSNode;
+   // convert the milliseconds to the seconds
+   if (!uStart) uStart = Date.now();
+   const timeStamp = Math.floor(uStart / 1000);
+
+   return gegePOS.sendRewards.sendTransaction(uAddr,token,sAddr,timeStamp, {from:gegeweb3.eth.coinbase, gas:defaultGas}) 
+}
+
 module.exports.sendRewards = function(uAddr, token, sAddr, uStart) {
    const nToken = (typeof token === "string")? parseInt(token) : token;
    
