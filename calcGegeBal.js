@@ -10,19 +10,29 @@ const linkgearPOS = require('./linkgearPOS.js');
 const gegeweb3 = linkgearPOS.gegeweb3();
 const todayStr = new Date().toISOString().substr(0, 10);
 const fileName = '.balanceSheet_<Today>.csv'.replace(/<TODAY>/i, todayStr);
-
 const fs = require('fs')
-console.log(`the file is: ${fileName}`);
 
-try {
-  fs.unlinkSync(fileName);
-  console.log(`successfully deleted ${fileName}`);
-} catch (err) {
-  // handle the error
+var noFile = false;
+process.argv.forEach(function (val, index, array) {
+   //console.log(`prearg = ${prearg}, val = ${val}`);
+   if (/^(-{1,2}nofile)$/.test(val.toLowerCase())) 
+      noFile = true;
+});
+
+if (!noFile) {
+    console.log(`the file is: ${fileName}`);
+
+    try {
+       fs.unlinkSync(fileName);
+       console.log(`successfully deleted ${fileName}`);
+    } catch (err) {
+    // handle the error
+    }
+
 }
 
 const logger = fs.createWriteStream(fileName, {
-  flags: 'a' // 'a' means appending (old data will be preserved)
+          flags: 'a' // 'a' means appending (old data will be preserved)
 })
    
 MongoClient.connect(url, function(err, db) {
@@ -36,9 +46,11 @@ MongoClient.connect(url, function(err, db) {
        users.forEach(function(user) {
            const account = user.local.account;
 	   if (account !== "undefined" && gegeweb3.isAddress(account)) { 
-              const bal = parseInt(linkgearPOS.balanceOf(account));
-              //console.log(`${account}, ${bal}`);
-              logger.write(`${account},${bal}\n`);
+              const bal = Number(linkgearPOS.balanceOf(account));
+              if (noFile)
+                  console.log(`${account}, ${bal}`);
+              else
+                  logger.write(`${account},${bal}\n`);
            }
        });      
        db.close();

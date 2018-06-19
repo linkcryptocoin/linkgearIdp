@@ -11,7 +11,8 @@ const fs = require('fs');
 const Web3 = require('web3');
 //const web3url = "http://127.0.0.1:8501";
 const web3url = (bProd)? "http://172.31.83.105:8501" : 
-                         "http://172.31.39.175:8506"; 
+                         //"http://172.31.39.175:8506"; 
+                         "http://127.0.0.1:8506"; 
 var gegeweb3 = new Web3(typeof gegeweb3 !== 'undefined'? gegeweb3.currentProvider : 
                                new Web3.providers.HttpProvider(web3url));
 

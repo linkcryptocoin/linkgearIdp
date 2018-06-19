@@ -39,7 +39,7 @@ array.forEach(function(line) {
        else {
           updedCount++;
           console.log(`${account}: ${oldBal} => ${newBal}, update balance `);
-          //linkgearPOS.directlySendRewards(account, newBbal);
+          linkgearPOS.directlySendRewards(account, newBal);
        }       
    }
 });
