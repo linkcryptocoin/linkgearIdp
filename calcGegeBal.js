@@ -47,6 +47,7 @@ MongoClient.connect(url, function(err, db) {
            const account = user.local.account;
 	   if (account !== "undefined" && gegeweb3.isAddress(account)) { 
               const bal = Number(linkgearPOS.balanceOf(account));
+              //const bal = linkgearPOS.balanceOf(account);
               if (noFile)
                   console.log(`${account}, ${bal}`);
               else
