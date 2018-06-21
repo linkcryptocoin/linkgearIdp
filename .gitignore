@@ -1,4 +1,5 @@
 .dummyKey
+.configure.json
 *.csv
 ooth.log
 *error*.log

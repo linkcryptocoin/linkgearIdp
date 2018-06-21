@@ -5,33 +5,29 @@ const {promisify} = require('util')
 const Ooth = require('ooth')
 const OothMongo = require('ooth-mongo')
 const https = require('https')
-const fs = require('fs')
 const OOTH_PATH = '/auth'
 const cors = require('cors')  
 
-const MONGO_HOST_QA = 'mongodb://34.238.58.243:27017'
-const MONGO_HOST_LOCAL = 'mongodb://localhost:27017'
-const HOST_LOCAL = 'https://localhost'
-const HOST_LOCALN = 'http://localhost'
-//const PORT = 3000
-//const MONGO_HOST = 'mongodb://172.31.83.105:32786'
-const MONGO_DB = 'linkgear'
-const HOST = 'https://172.31.83.105'
-const HOSTN = 'http://172.31.83.105'
-//const PORT = 8091
-const SECRET = 'linkgearsecret'
-const SHARED_SECRET = 'linkgearsharedsecret'
+const fs = require('fs');
+const config = JSON.parse(fs.readFileSync('.configure.json'));
+
+const MONGO_HOST_LOCAL = config.idp.mongo_host_local
+const MONGO_HOST_QA = config.idp.mongo_host_qa
+const HOST_LOCAL = config.idp.host_local
+const HOST_LOCALN = config.idp.host_localn
+const MONGO_DB = config.idp.mongo_db
+const SECRET = config.idp.secret
+const SHARED_SECRET = config.idp.shared_secret
 
 const oothLocal = require('./ooth-local.js')  // Linkgear
 const linkgearPOS = require('./linkgearPOS.js')  // Linkgear
-const bProd = (linkgearPOS.getSysChar() === 'P')
 
 //////////////////////////////////////////////////////
-var PORT      = 8091    // Ddefault running port
-var qadb      = !bProd  // QA Database flag
-var httpsRun  = false   // https or http, default is http
-var nocors    = !bProd  // no cors(Cross Original Resource Share) checking
-var noLogging = !bProd  // Logging control
+var PORT      = config.idp.port  // Ddefault running port
+var qadb      = !config.sys.prod // QA Database flag
+var httpsRun  = false            // https or http, default is http
+var nocors    = !config.sys.prod // no cors(CrossOriginalResourceShare) checking
+var noLogging = !config.sys.prod // Logging control
 // Get the port number if provided in the arguments
 var prearg = "";
 process.argv.forEach(function (val, index, array) {
@@ -165,8 +161,8 @@ const start = async () => {
         
         if (httpsRun) {
             const server = https.createServer({
-                         key: fs.readFileSync('keys/key.pem'),
-                         cert: fs.readFileSync('keys/cert.pem'),
+                         key: fs.readFileSync(config.idp.key),
+                         cert: fs.readFileSync(config.idp.cert),
                          }, app)
 
              await new Promise(resolve => server.listen(PORT, resolve));

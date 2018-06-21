@@ -1,0 +1,46 @@
+{ 
+    "sys": {
+        "id": "dev",
+        "os": "Ubuntu",
+        "ver": "16.04.4 LTS",
+        "maker": "Linux 4.4.0-1061-aws x86_64)",
+        "npm": "@6.1.0",
+        "yarn": "@1.5.1",
+        "git": "@2.7.4"
+    },
+    "gegechain": {
+        "smartcontractaddr": "0x12345678900000000000000000",
+        "web3url": "http://localhost:8405",  
+        "explorer": "http://localhost:8080",
+        "defaultgas": 8000000,
+        "defaultsnode": "0x0",
+        "takenLimitation": {
+                           "oneTime": 400,
+                           "daily":  15000
+                           },
+        "filler": ""
+    },
+    "swarm": {
+        "api": " http://linkgear.net:95000/",
+        "networkid": 90998,
+        "port": 95000,
+        "httpaddr": "localhost"
+    },
+    "idp": {
+        "port": 8090,
+        "protocol": "https",
+        "host": "https://localhost",
+        "hostn": "http://localhost",
+        "mongo_host_local": "mongodb://localhost:27017",
+        "mongo_db": "link",
+        "host_local": "localhost",
+        "secret": "secret",
+        "shared_secret": "shared",
+        "key": "keyfile",
+        "cert": "cerrfile"
+    },
+    "chainpage": {
+        "server": "9000",
+        "db": "mongodb"
+    }
+} 
