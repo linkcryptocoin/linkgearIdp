@@ -5,8 +5,9 @@
 // Linkgear Foundation, All rights reserved
 
 'use strict';
-const linkgearPOS = require('./linkgearPOS.js');
-const gegeweb3 = linkgearPOS.gegeweb3();
+const Gege = require('./GegeChain.js');
+const gege = new Gege();
+
 const todayStr = new Date().toISOString().substr(0, 10);
 var fileName = '.balanceSheet_<Today>.csv'.replace(/<TODAY>/i, todayStr);
 
@@ -29,9 +30,9 @@ array.forEach(function(line) {
    const [account, balFromCsv] = line.split(",");
    const token = parseInt(balFromCsv);
    const newBal = (token < 100)? 100 : token;
-   const oldBal = Number(linkgearPOS.balanceOf(account));
+   const oldBal = Number(gege.balanceOf(account));
   
-   if (gegeweb3.isAddress(account)) {
+   if (gege.isAddress(account)) {
        if (oldBal === newBal) {
           noUpdCount++;
           console.log(`${account}: ${oldBal} = ${newBal}, no change needed`);
@@ -39,7 +40,7 @@ array.forEach(function(line) {
        else {
           updedCount++;
           console.log(`${account}: ${oldBal} => ${newBal}, update balance `);
-          const result = linkgearPOS.directlySendRewards(account, newBal);
+          const result = gege.directlySendRewards(account, newBal);
           //console.log(`result: ${result}`);
        }       
    }

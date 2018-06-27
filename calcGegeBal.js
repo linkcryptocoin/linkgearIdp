@@ -6,8 +6,9 @@
 'use strict';
 const MongoClient = require('mongodb').MongoClient;
 const url = "mongodb://localhost:27017/";
-const linkgearPOS = require('./linkgearPOS.js');
-const gegeweb3 = linkgearPOS.gegeweb3();
+const Gege = require('./GegeChain.js');
+const gege = new Gege();
+
 const todayStr = new Date().toISOString().substr(0, 10);
 const fileName = '.balanceSheet_<Today>.csv'.replace(/<TODAY>/i, todayStr);
 const fs = require('fs')
@@ -45,9 +46,8 @@ MongoClient.connect(url, function(err, db) {
   
        users.forEach(function(user) {
            const account = user.local.account;
-	   if (account !== "undefined" && gegeweb3.isAddress(account)) { 
-              const bal = Number(linkgearPOS.balanceOf(account));
-              //const bal = linkgearPOS.balanceOf(account);
+	   if (account !== "undefined" && gege.isAddress(account)) { 
+              const bal = Number(gege.balanceOf(account));
               if (noFile)
                   console.log(`${account}, ${bal}`);
               else
