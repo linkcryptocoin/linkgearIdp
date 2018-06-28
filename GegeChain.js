@@ -7,8 +7,10 @@
 const fs = require('fs');
 
 class GegeChain {  
-   constructor() {
-       this.config = JSON.parse(fs.readFileSync('.configure.json'));
+   constructor(iConfigFile) {
+       const configFile = (iConfigFile)? iConfigFile : '.configure.json'; 
+           
+       this.config = JSON.parse(fs.readFileSync(configFile));
        this.smAddr = this.config.gegechain.smartcontractaddr;
        this.web3url = this.config.gegechain.web3url;
        this.defaultGas = this.config.gegechain.defaultgas;
@@ -31,15 +33,18 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
 
      const contractAddress = this.smAddr;
 
-     this. gegeweb3.eth.defaultAccount = this.gegeweb3.eth.coinbase;
+     this.gegeweb3.eth.defaultAccount = this.gegeweb3.eth.coinbase;
      this.gegeweb3.personal.unlockAccount(this.gegeweb3.eth.coinbase, this.getCoinbaseKey('userKey'));
 
      this.gegePOS = this.gegeweb3.eth.contract(contractABI).at(contractAddress);
    }
 
+   // Check the connectivity
    isConnected() { return this.gegeweb3.isConnected() }
 
+   // Check the address/account
    isAddress(addr) { return this.gegeweb3.isAddress(addr) }
+
    // Create an account
    createAccount(privateKey) {
         const account = this.gegeweb3.personal.newAccount(privateKey);
@@ -53,6 +58,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
       return keyInput.slice(parseInt(start), parseInt(end));
    }
 
+   // Get the monday of the current day 
    getMonday(iDay) {
        const d = (iDay)? new Date(iDay) : new Date();
 
@@ -60,7 +66,8 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        const diff = d.getDate() - day + (day == 0 ? -6 : 1);
        return new Date(d.setDate(diff));
    }
-
+   
+   // Get the sunday of the current day 
    getSunday(iDay) {
         const d = (iDay)? new Date(iDay) : new Date();
         const day = d.getDay();
@@ -68,6 +75,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
         return new Date(d.setDate(diff));
    }
 
+   // Format a day to ISO format "yyyy-MM-ddThh:mm:ss.SECZ"
    formatISODate(date) {
         const d = (date)? new Date(date) : new Date();
         var   month = '' + (d.getMonth() + 1);
@@ -80,6 +88,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
         return [year, month, day].join('-') + "T00:00:00.000Z";
    }
 
+   // Send the rewards
    directlySendRewards(uAddr, token, sAddr, uStart) {
        const nToken = (typeof token === "string")? parseInt(token) : token;
        if (nToken < 0) return false;
@@ -98,6 +107,10 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        return this.gegePOS.balanceOf(acct) 
    }
 
+   // userAction - gegeChain operation
+   // app: ["ChainPage", "ChainPost"]
+   // action: ["comment", "like", "dislike", "post", "login"]
+   // uAddr - address/account, sAddr - super node, uStart - start time
    userAction(uAddr, sAddr, uStart, app, action) {
        // transfer rewards
        if (!sAddr || !this.gegeweb3.isAddress(sAddr)) sAddr = this.defaultSNode;
@@ -105,16 +118,22 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        if (!uStart) uStart = Date.now();
           const timeStamp = Math.floor(uStart / 1000);
        
+       const appStr = (typeof app === 'string')? app.toLowerCase() : "" + app; 
        var ret;
-       switch(app.toLowerCase()) {
+       switch(appStr) {
+          case '1':
           case 'chainpage':
           ret = handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase()); 
           break;
 
+          case '2':
           case 'chainpost':
           ret = handleChainPost(uAddr, sAddr, timeStamp, action.toLowerCase()); 
           break;
  
+          //case 'please add more':
+          //   ret = handeApp(...);
+          //   break;
           default:
           throw `the application ${app} is not supported yet`;
        }

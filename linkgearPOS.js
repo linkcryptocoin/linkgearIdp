@@ -403,6 +403,10 @@ function isChecksumAddress(address) {
 
 module.exports.isAddress = isAddress;
 
+// userAction - gegeChain operation
+// app: ["ChainPage", "ChainPost"]
+// action: ["comment", "like", "dislike", "post", "login"]
+// uAddr - address/account, sAddr - super node, uStart - start time
 module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
    // transfer rewards
    if (!sAddr || !isAddress(sAddr)) sAddr = defaultSNode;
@@ -410,17 +414,24 @@ module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
    if (!uStart) uStart = Date.now();
    const timeStamp = Math.floor(uStart / 1000);
    
+   const appStr = (typeof app === 'string')? app.toLowerCase() : "" + app;
    var ret;
-   switch(app.toLowerCase()) {
-      case 'chainpage':
-          ret = handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase()); 
+   switch(appStr) {
+       case '1':
+       case 'chainpage':
+          ret = handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase());
           break;
 
-      case 'chainpost':
+       case '2':
+       case 'chainpost':
           ret = handleChainPost(uAddr, sAddr, timeStamp, action.toLowerCase()); 
           break;
  
-      default:
+       //case 'please add more':
+       //   ret = handeApp(...);
+       //   break;
+
+       default:
           throw `the application ${app} is not supported yet`;
    }
    return ret;
