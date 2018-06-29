@@ -145,19 +145,16 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        var takenAwayToken = 0;
        switch(action) {
           case 'comment':
-          takenAwayToken = 5;
-          break;
+              takenAwayToken = 5; break;
           
           case 'like':
-          takenAwayToken = 5;
-          break;
+              takenAwayToken = 5;  break;
           
           case 'dislike':
-          takenAwayToken = 10;
-          breal;
+              takenAwayToken = 10; break;
           
           default: 
-          throw `ChainPage: "${action}" not supported`;  
+              throw `ChainPage: "${action}" not supported`;  
       }
    
       return {result: this.gegePOS.deductRewards(uAddr, takenAwayToken, sAddr, uStart),
@@ -169,30 +166,33 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        var rule = {rewardToken: 0, limitPerDay: 0}; 
        switch(action) {
           case 'login':
-          rule = {rewardToken: 10, limitPerDay: 1}; break;
+              rule = {rewardToken: 10, limitPerDay: 1}; break;
           
           case 'post':
-          rule = {rewardToken: 20, limitPerDay: 5}; break;
+              rule = {rewardToken: 20, limitPerDay: 5}; break;
       
           case 'comment':
-          rule = {rewardToken: 20, limitPerDay: 5}; break;
+              rule = {rewardToken: 20, limitPerDay: 5}; break;
       
           case 'like':
-          rule = {rewardToken: 5, limitPerDay: 10}; break;
+              rule = {rewardToken: 5, limitPerDay: 10}; break;
       
           case 'dislike':
-          rule = {rewardToken: 5, limitPerDay: 10}; break;
+              rule = {rewardToken: 5, limitPerDay: 10}; break;
       
+          case 'referral':
+              rule = {rewardToken: 10, limitPerDay: 99999}; break;
+          
           default: 
-          throw `ChainPost: "${action}" not supported`;  
+              throw `ChainPost: "${action}" not supported`;  
       }
      
       // Check the daily limitation
       const dateEnd = new Date();   // current time
       const dateBegin = new Date(formatISODate());  // The beginning of Today
    
-      return {result: this.gegePOS.sendRewards(uAddr,rule.rewardToken,sAddr,uStart),                message: `ChainPost "${action}" was completed in gegeChain`};
-      };
+      return {result: this.gegePOS.sendRewards(uAddr,rule.rewardToken,sAddr,uStart), message: `ChainPost "${action}" was completed in gegeChain`};
+   };
 }
 
 module.exports = GegeChain

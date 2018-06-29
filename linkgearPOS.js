@@ -475,6 +475,8 @@ function handleChainPost(uAddr, sAddr, uStart, action) {
          rule = {rewardToken: 5, limitPerDay: 10}; break;
       case 'dislike':
          rule = {rewardToken: 5, limitPerDay: 10}; break;
+      case 'referral':
+         rule = {rewardToken: 10, limitPerDay: 99999}; break;
       default: 
          throw `ChainPost: "${action}" not supported`;  
    }
