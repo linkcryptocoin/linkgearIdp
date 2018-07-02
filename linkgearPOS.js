@@ -1,4 +1,4 @@
-
+// LinkgearPOS: gegeChain Web3 activities
 // Author: Simon Li
 // Date: May 17, 2018
 // LinkGear Fundation, all  rights reserved
@@ -496,4 +496,67 @@ function handleChainPost(uAddr, sAddr, uStart, action) {
    });
 
    return {result: true, message: "Async running, please wait or refresh"};
+}
+
+// Web3 methods/attributes
+module.exports.web3call = function(web3Func, args) {
+    const web3 = gegeweb3;
+    const gege = gegePOS;
+    const strFunc = web3Func.toLowerCase();
+    switch (strFunc) {
+        case 'eth.coinbase':
+            return web3.eth.coinbase;
+        case 'eth.accounts':
+            return web3.eth.accounts;
+        case 'eth.filter':
+            return web3.eth.filter("latest"); 
+        case 'eth.blocknumber': 
+            return web3.eth.blockNumber; 
+        case 'eth.getblock':
+            return JSON.stringify(web3.eth.getBlock(args[0])); 
+        case 'isconnected':
+            return web3.isConnected(); 
+        case 'version.api':
+            return web3.version.api;
+        case 'version.client':
+            return web3.version.client;
+        case 'version.ethereum': 
+            return web3.version.ethereum;
+        case 'version.whisper':
+            return web3.version.whisper;
+        case 'version.network':
+            return web3.version.network;
+        case 'eth.getTransactionfromblock': 
+            return web3.eth.getTransactionFromBlock(args[0], args[1]);
+        case 'getexchangerate':
+            return gege.getExchangeRate();
+        case 'tohex':
+            return web3.toHex(args[0]);
+        case 'fromwei':
+            return web3.fromWei(args[0], "ether");
+        case 'towei':
+            return web3.toWei(args[0], "ether");
+        case 'isaddress':
+            return web3.isAddress(args[0]);
+        case 'eth.getbalance':
+            return web3.eth.getBalance(args[0]);
+        case 'eth.gettransactioncount':
+            return web3.eth.getTransactionCount(args[0]);
+        case 'eth.getcode':
+            return web3.eth.getCode(args[0]);
+        case 'balanceof':
+            return gege.balanceOf(args[0]);
+        case 'clique.getsnapshot.recents':
+            const blkNum = args[0];
+            const obj = web3.clique.getSnapshot(web3.toHex(blkNum)).recents;
+            return (obj)? JSON.stringify(obj) : null
+        case 'eth.getblocktransactioncount':
+            return web3.eth.getBlockTransactionCount(args[0]);
+        case 'eth.gettransactionreceipt':
+            return web3.eth.getTransactionReceipt(args[0]);
+        case 'eth.gettransaction':
+            return web3.eth.getTransaction(args[0]);
+        default:
+            throw `${web3Func} is not supported`;
+    }
 }

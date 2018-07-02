@@ -605,6 +605,13 @@ module.exports = function ({
             });
         });        
 
+        registerMethod('web3call', function (req, res) {
+            const { web3Func, args } = req.body;
+            const result = (args)? linkgearPOS.web3call(web3Func, args) :
+                                   linkgearPOS.web3call(web3Func);
+            return res.send({result: result});
+        });
+
         registerMethod('change-password', requireLogged, function (req, res) {
             const { userId, password, newPassword } = req.body;
 

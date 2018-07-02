@@ -5,6 +5,7 @@
 "use strict";
 
 const fs = require('fs');
+const mnid = require('mnid');
 
 class GegeChain {  
    constructor(iConfigFile) {
@@ -107,6 +108,16 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        return this.gegePOS.balanceOf(acct) 
    }
 
+   encode(account) {
+       const LINKGEAR_NETWORK = '0xbda';   // =3034
+       return mnid.encode({ network: LINKGEAR_NETWORK, 
+                            address: account
+                         });
+   }
+   decode(daccount) {
+       return mnid.decode(daccount).address
+   }
+ 
    // userAction - gegeChain operation
    // app: ["ChainPage", "ChainPost"]
    // action: ["comment", "like", "dislike", "post", "login"]
@@ -192,7 +203,70 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
       const dateBegin = new Date(formatISODate());  // The beginning of Today
    
       return {result: this.gegePOS.sendRewards(uAddr,rule.rewardToken,sAddr,uStart), message: `ChainPost "${action}" was completed in gegeChain`};
-   };
+   }
+   
+   // Web3 methods/attributes
+   web3call(web3Func, args) {
+      const web3 = this.gegeweb3;
+      const gege = this.gegePOS;
+      const strFunc = web3Func.toLowerCase();
+      switch (strFunc) {
+          case 'eth.coinbase':
+              return web3.eth.coinbase;
+          case 'eth.accounts':
+              return web3.eth.accounts;
+          case 'eth.filter':
+              return web3.eth.filter("latest"); 
+          case 'eth.blocknumber': 
+              return web3.eth.blockNumber; 
+          case 'eth.getblock':
+              return JSON.stringify(web3.eth.getBlock(args[0])); 
+          case 'isconnected':
+              return web3.isConnected(); 
+          case 'version.api':
+              return web3.version.api;
+          case 'version.client':
+              return web3.version.client;
+          case 'version.ethereum': 
+              return web3.version.ethereum;
+          case 'version.whisper':
+              return web3.version.whisper;
+          case 'version.network':
+              return web3.version.network;
+          case 'eth.getTransactionfromblock': 
+              return web3.eth.getTransactionFromBlock(args[0], args[1]);
+          case 'getexchangerate':
+              return gege.getExchangeRate();
+          case 'tohex':
+              return web3.toHex(args[0]);
+          case 'fromwei':
+              return web3.fromWei(args[0], "ether");
+          case 'towei':
+              return web3.toWei(args[0], "ether");
+          case 'isaddress':
+              return web3.isAddress(args[0]);
+          case 'eth.getbalance':
+              return web3.eth.getBalance(args[0]);
+          case 'eth.gettransactioncount':
+              return web3.eth.getTransactionCount(args[0]);
+          case 'eth.getcode':
+              return web3.eth.getCode(args[0]);
+          case 'balanceof':
+              return gege.balanceOf(args[0]);
+          case 'clique.getsnapshot.recents':
+              const blkNum = args[0];
+              const obj = web3.clique.getSnapshot(web3.toHex(blkNum)).recents;
+              return (obj)? JSON.stringify(obj) : null
+          case 'eth.getblocktransactioncount':
+              return web3.eth.getBlockTransactionCount(args[0]);
+          case 'eth.gettransactionreceipt':
+              return web3.eth.getTransactionReceipt(args[0]);
+          case 'eth.gettransaction':
+              return web3.eth.getTransaction(args[0]);
+          default:
+             throw `${func} is not supported`;
+      }    
+   }
 }
 
 module.exports = GegeChain
