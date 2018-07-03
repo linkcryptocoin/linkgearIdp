@@ -216,7 +216,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
           case 'eth.accounts':
               return web3.eth.accounts;
           case 'eth.filter':
-              return web3.eth.filter("latest"); 
+              return JSON.stringify(web3.eth.filter("latest")); 
           case 'eth.blocknumber': 
               return web3.eth.blockNumber; 
           case 'eth.getblock':
@@ -230,11 +230,11 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
           case 'version.ethereum': 
               return web3.version.ethereum;
           case 'version.whisper':
-              return web3.version.whisper;
+              return "0.0*"; //web3.version.whisper;
           case 'version.network':
               return web3.version.network;
           case 'eth.getTransactionfromblock': 
-              return web3.eth.getTransactionFromBlock(args[0], args[1]);
+              return JSON.stringify(web3.eth.getTransactionFromBlock(args[0], args[1]));
           case 'getexchangerate':
               return gege.getExchangeRate();
           case 'tohex':
@@ -260,9 +260,9 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
           case 'eth.getblocktransactioncount':
               return web3.eth.getBlockTransactionCount(args[0]);
           case 'eth.gettransactionreceipt':
-              return web3.eth.getTransactionReceipt(args[0]);
+              return JSON.stringify(web3.eth.getTransactionReceipt(args[0]));
           case 'eth.gettransaction':
-              return web3.eth.getTransaction(args[0]);
+              return JSON.stringify(web3.eth.getTransaction(args[0]));
           default:
              throw `${func} is not supported`;
       }    
