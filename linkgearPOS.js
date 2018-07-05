@@ -513,7 +513,7 @@ module.exports.web3call = function(web3Func, args) {
         case 'eth.blocknumber': 
             return web3.eth.blockNumber; 
         case 'eth.getblock':
-            return JSON.stringify(web3.eth.getBlock(args[0])); 
+            return web3.eth.getBlock(args[0]); 
         case 'isconnected':
             return web3.isConnected(); 
         case 'version.api':
@@ -547,9 +547,9 @@ module.exports.web3call = function(web3Func, args) {
         case 'balanceof':
             return gege.balanceOf(args[0]);
         case 'clique.getsnapshot.recents':
-            const blkNum = args[0];
-            const obj = web3.clique.getSnapshot(web3.toHex(blkNum)).recents;
-            return (obj)? JSON.stringify(obj) : null
+            const blkNum = (typeof args[0] === "string")? Number(args[0])
+                                                        : args[0];
+            return obj = web3.clique.getSnapshot(web3.toHex(blkNum)).recents;
         case 'eth.getblocktransactioncount':
             return web3.eth.getBlockTransactionCount(args[0]);
         case 'eth.gettransactionreceipt':

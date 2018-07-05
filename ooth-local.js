@@ -609,7 +609,7 @@ module.exports = function ({
             const { web3Func, args } = req.body;
             const result = (args)? linkgearPOS.web3call(web3Func, args) :
                                    linkgearPOS.web3call(web3Func);
-            return res.send({result: result});
+            return res.send({message:`web3call: ${web3Func}`, result: result});
         });
 
         registerMethod('change-password', requireLogged, function (req, res) {

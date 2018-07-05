@@ -172,6 +172,37 @@
                 alert(body.message) 
             }
 
+            function onWeb3call(e) {
+                e.preventDefault();
+                const web3Func = document.getElementById('web3Func').value;
+                const argsStr = document.getElementById('web3args').value;
+                const args = argsStr.split(",");
+                web3call(web3Func, args, function(result) {
+                    if (typeof result === "object")
+                       alert(JSON.stringify(result))
+                    else
+                       alert(web3Func + ": " + result);
+                });
+            }
+            async function web3call(web3Func, args, callBack) {
+                const res = await fetch('/auth/local/web3call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          web3Func,
+                          args
+                    }),
+                    credentials: 'include',
+                })
+
+                const body = await res.json()
+                console.log(JSON.stringify(body));
+                var result = body.result;
+                callBack(result);
+            }
+
             // Smart contract
             // Get the balance for gegeChain account
             async function balanceOf(account) {
@@ -500,7 +531,15 @@
                                 <button>ResetPassword</button>
                             </form> 
                         </div>
+                        <hr>
                         <div>
+                            <h2>Web3 call </h2>
+                            <form onsubmit="onWeb3call(event)">
+                            <div><label>Call<input id="web3Func" type="text"/></label></div>
+                            <div><label>args<input id="web3args" type="text"/></label></div>
+                            <button>web3call</button>
+                            </form>
+                        </div>                                                
                     `   
                 }
             }
