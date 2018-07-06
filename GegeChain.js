@@ -205,10 +205,16 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
       return {result: this.gegePOS.sendRewards(uAddr,rule.rewardToken,sAddr,uStart), message: `ChainPost "${action}" was completed in gegeChain`};
    }
    
+
    // Web3 methods/attributes
    web3call(web3Func, args) {
       const web3 = this.gegeweb3;
       const gege = this.gegePOS;
+      var fromBlockNum = 0;
+      var toBlockNum = 0;
+      var num = 0;
+      var idx = 0;
+
       const strFunc = web3Func.toLowerCase();
       switch (strFunc) {
           case 'eth.coinbase':
@@ -216,7 +222,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
           case 'eth.accounts':
               return web3.eth.accounts;
           case 'eth.filter':
-              return JSON.stringify(web3.eth.filter("latest")); 
+              return web3.eth.filter("latest"); 
           case 'eth.blocknumber': 
               return web3.eth.blockNumber; 
           case 'eth.getblock':
@@ -234,7 +240,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
           case 'version.network':
               return web3.version.network;
           case 'eth.getTransactionfromblock': 
-              return JSON.stringify(web3.eth.getTransactionFromBlock(args[0], args[1]));
+              return web3.eth.getTransactionFromBlock(args[0], args[1]);
           case 'getexchangerate':
               return gege.getExchangeRate();
           case 'tohex':
@@ -260,13 +266,111 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
           case 'eth.getblocktransactioncount':
               return web3.eth.getBlockTransactionCount(args[0]);
           case 'eth.gettransactionreceipt':
-              return JSON.stringify(web3.eth.getTransactionReceipt(args[0]));
+              return web3.eth.getTransactionReceipt(args[0]);
           case 'eth.gettransaction':
-              return JSON.stringify(web3.eth.getTransaction(args[0]));
+              return web3.eth.getTransaction(args[0]);
+          case 'getblocks':
+	      var arrBlocks = [];
+              num = (args[0])? args[0] : 10;
+              fromBlockNum = (args[1])? args[1] : web3.eth.blockNumber;
+              toBlockNum = (fromBlockNum > num)? fromBlockNum - num : 0;
+              for (idx = fromBlockNum; idx > toBlockNum; idx--) {
+                  arrBlocks.push(web3.eth.getBlock(idx))
+              }
+              return arrBlocks; 
+             
+          case 'gettransactionsfromblocks':
+              var arrTrans = [];
+              num = (args[0])? args[0] : 10;
+              fromBlockNum = (args[1])? args[1] : web3.eth.blockNumber;
+              toBlockNum = (fromBlockNum > num)? fromBlockNum - num : 0;
+              for (idx = fromBlockNum; idx > toBlockNum; idx--) {
+                  arrTrans.push(web3.eth.getTransactionFromBlock(idx))
+              }
+              return arrBlocks;              
+           
+          case 'updatestats':
+             var st = {};
+             st.blockNum = web3.eth.blockNumber;
+             if (st.blockNum === undefined) 
+                return st;
+
+             var blockNewest = web3.eth.getBlock(st.blockNum); 
+             if (blockNewest === undefined) 
+                return st;
+
+             // difficulty
+             st.difficulty = Number(blockNewest.difficulty);
+             st.difficultyToExponential = st.difficulty.toExponential(3);
+             st.totalDifficulty = Number(blockNewest.totalDifficulty);
+             st.totalDifficultyToExponential = st.totalDifficulty.toExponential(3);
+             st.totalDifficultyDividedByDifficulty = st.totalDifficulty / st.difficulty;
+             st.AltsheetsCoefficient = st.totalDifficultyDividedByDifficulty / st.blockNum;
+             // large numbers still printed nicely:
+             //st.difficulty_formatted = st.difficulty.toFormat(0);
+
+             // Gas Limit
+             st.gasLimit = blockNewest.gasLimit; //.toFormat(0) + " m/s";
+
+             // Time
+             var newDate = new Date();
+             newDate.setTime(blockNewest.timestamp*1000);
+             st.time = newDate.toUTCString();
+  
+             st.secondsSinceBlock1 = blockNewest.timestamp - 1438226773;
+             st.daysSinceBlock1 = (st.secondsSinceBlock1 / 86400).toFixed(2);
+
+             // Average Block Times:
+             // TODO: make fully async, put below into 'fastInfosCtrl'
+             var blockBefore = web3.eth.getBlock(st.blockNum - 1);
+             if(blockBefore !== undefined) {
+                st.blocktime = blockNewest.timestamp - blockBefore.timestamp;
+             }
+             st.range1 = 100;
+             var range = st.range1;
+             var blockPast = web3.eth.getBlock(Math.max(st.blockNum - range,0));             if (blockBefore !== undefined) {
+                  st.blocktimeAverage1 = ((blockNewest.timestamp - blockPast.timestamp)/range).toFixed(2);
+             }
+
+             st.range2 = 1000;
+             range = st.range2;
+             blockPast = web3.eth.getBlock(Math.max(st.blockNum - range,0));
+             if (blockBefore !== undefined) {
+                 st.blocktimeAverage2 = ((blockNewest.timestamp - blockPast.timestamp)/range).toFixed(2);
+             }
+             
+             st.range3 = 10000;
+             range = st.range3;
+             blockPast = web3.eth.getBlock(Math.max(st.blockNum - range,0));
+             if (blockBefore !== undefined) {
+                 st.blocktimeAverage3 = ((blockNewest.timestamp - blockPast.timestamp)/range).toFixed(2);
+             }
+              
+             st.range4 = 100000;
+             range = st.range4;
+             blockPast = web3.eth.getBlock(Math.max(st.blockNum - range,0));
+             if (blockBefore !== undefined) {
+                 st.blocktimeAverage4 = ((blockNewest.timestamp - blockPast.timestamp)/range).toFixed(2);
+             }
+
+             range = st.blockNum;
+             blockPast = web3.eth.getBlock(1);   
+             if (blockBefore !== undefined) {
+                st.blocktimeAverageAll = ((blockNewest.timestamp - blockPast.timestamp)/range).toFixed(2);
+             }
+             st.isConnected = web3.isConnected();
+             st.versionApi = web3.version.api; 
+             st.versionClient = web3.version.client; 
+             st.versionNetwork = web3.version.network; 
+             st.versionCurrency = web3.version.ethereum; 
+             st.versionWhisper = '0.0*'; 
+             return(st);
+
           default:
              throw `${func} is not supported`;
       }    
    }
+   
 }
 
 module.exports = GegeChain
