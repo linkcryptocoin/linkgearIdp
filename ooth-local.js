@@ -103,7 +103,8 @@ module.exports = function ({
         }, nodeifyAsync((username, password) => {
             return getUserByUniqueField('username', username).then(user => {
                 if (!user) {
-                    return getUserByUniqueField('email', username);
+                    //return getUserByUniqueField('email', username);
+                   return getUserByUniqueField('email', username.toLowerCase());
                 } else {
                     return user;
                 }

@@ -134,12 +134,12 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
        switch(appStr) {
           case '1':
           case 'chainpage':
-          ret = handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase()); 
+          ret = this.handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase()); 
           break;
 
           case '2':
           case 'chainpost':
-          ret = handleChainPost(uAddr, sAddr, timeStamp, action.toLowerCase()); 
+          ret = this.handleChainPost(uAddr, sAddr, timeStamp, action.toLowerCase()); 
           break;
  
           //case 'please add more':
@@ -200,7 +200,7 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
      
       // Check the daily limitation
       const dateEnd = new Date();   // current time
-      const dateBegin = new Date(formatISODate());  // The beginning of Today
+      const dateBegin = new Date(this.formatISODate());  // The beginning of Today
    
       return {result: this.gegePOS.sendRewards(uAddr,rule.rewardToken,sAddr,uStart), message: `ChainPost "${action}" was completed in gegeChain`};
    }

@@ -513,6 +513,8 @@ module.exports.web3call = function(web3Func, args) {
             return web3.eth.coinbase;
         case 'eth.accounts':
             return web3.eth.accounts;
+        case 'eth.hashrate':
+            return web3.eth.hashrate;
         case 'eth.filter':
             return web3.eth.filter("latest"); 
         case 'eth.blocknumber': 
