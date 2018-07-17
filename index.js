@@ -156,9 +156,11 @@ const start = async () => {
                 next();
         })
 
-        console.log(`${__dirname}/index.html`);
-        app.get('/', (req, res) => res.sendFile(`${__dirname}/index.html`))
-        
+        if (config.idp.demopage) {
+            console.log(`${__dirname}/index.html`);
+            app.get('/', (req, res) => res.sendFile(`${__dirname}/index.html`))
+        }
+
         if (httpsRun) {
             const server = https.createServer({
                          key: fs.readFileSync(config.idp.key),
