@@ -15,11 +15,12 @@
 5) gegeChain token operation: balanceOf, sendRewards, deductRewards, userSendToken
 6) stake operation: joinStake addStake, withdrawStake, removeStake
 7) account management: register, linkAccount
+8) userAction for ChainPage, ChainPost with action: like, dislike, login, post, comment, etc
 
 ## Server Start
 1) yarn -- collect/download all the packages
 2) yarn start [options] or forever start index.js [options] (options: --port, --nocors --https, --nolog --qadb)
 3) or use port 3200 with https: yarn start --port 3200 --https
 
-## Client page
-http://linkcryptocoin.com:8091
+## Client page - demo
+http://34.238.58.243:8091/
