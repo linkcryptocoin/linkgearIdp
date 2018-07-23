@@ -441,6 +441,19 @@ module.exports = function ({
             });
         });
 
+        // Confirm the incoming password with the current one 
+        registerMethod('confirm-password', requireLogged, function (req, res) {
+            const {userId, confirmingPassword} = req.body;
+            // Verify the password according to our rule
+            testValue('password', confirmingPassword);
+            //console.log("confirm-password: passing TestValue checking");
+            return getUserById(userId).then(user=> {
+                const result = compareSync(confirmingPassword, user[name].password)? 'Yes' : 'No';
+                //console.log("confirm-password: result = " + result);
+                return res.send({message: 'Confirm password', result: result});
+            });
+        });
+        
         // Link the account - smart contract
         //
         registerMethod('t-add', requireLogged, function (req, res) {

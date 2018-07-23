@@ -148,6 +148,32 @@
                 alert(body.message) 
             }
             
+            // Confirm Password
+            async function onConfirmPassword(e) {
+                alert("onConfirmPassword");
+                e.preventDefault();
+
+                const user = await getUser()
+                const userId = user._id;
+
+                const confirmingPassword = document.getElementById('confirmpassword').value
+
+                //alert("ConfirmingPassword = " + confirmingPassword);
+                const res = await fetch('/auth/local/confirm-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        confirmingPassword,
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(body.message + ": "+ body.result) 
+            }
+            
             // Link Account
             async function onLinkAccount(e) {
                 //alert("onLinkAccount");
@@ -451,6 +477,15 @@
                                 <div><label>Old Password&nbsp;&nbsp;&nbsp;<input id="changepassword-old" type="password"/></label></div>
                                 <div><label>New Password&nbsp;<input id="changepassword-new" type="password"/></label></div>
                                 <button>ChangePassword</button>
+                            </form> 
+                        </div>
+                        <hr>
+                        <div>
+                            <h2>Confirm Password 
+                            </h2>
+                            <form onsubmit="onConfirmPassword(event)">
+                                <div><label>Confirm password &nbsp;<input id="confirmpassword" type="password"/></label></div>
+                                <button>ConfirmPassword</button>
                             </form> 
                         </div>
                         <hr>
