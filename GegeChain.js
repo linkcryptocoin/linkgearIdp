@@ -206,6 +206,34 @@ const contractABI = [{"constant":false,"inputs":[{"name":"_superNode","type":"ad
    }
    
 
+   // This function shows how to deduct rewards from user(publisher)
+   deductRewards(uAddr, token, sAddr, uStart) {
+      const nToken = (typeof token === "string")? parseInt(token) : token;
+      if (nToken <= 0) return false;
+
+       if (!sAddr || !this.gegeweb3.isAddress(sAddr)) sAddr = this.defaultSNode;
+    
+       // convert the milliseconds to the seconds
+       if (!uStart) uStart = Date.now();
+       const timeStamp = Math.floor(uStart / 1000);
+ 
+       return this.gegePOS.deductRewards(uAddr, token, sAddr, timeStamp)  
+   }
+
+   // This function shows how a user can send rewards publisher
+   userSendToken(uAddr, toAddr, token, sAddr, uStart) {
+       const nToken = (typeof token === "string")? parseInt(token) : token;
+       if (nToken <= 0) return false;
+
+       if (!sAddr || !this.gegeweb3.isAddress(sAddr)) sAddr = this.defaultSNode;
+    
+       // convert the milliseconds to the seconds
+       if (!uStart) uStart = Date.now();
+       const timeStamp = Math.floor(uStart / 1000);
+
+       return this.gegePOS.userSendToken(uAddr,toAddr,token,sAddr,timeStamp)
+   }
+
    // Web3 methods/attributes
    web3call(web3Func, args) {
       const web3 = this.gegeweb3;
