@@ -20,7 +20,7 @@ class GegeChain {
        const Web3 = require('web3');
 
        this.gegeweb3 = new Web3(typeof this.gegeweb3 !== 'undefined'? 
-                       gegeweb3.currentProvider : 
+                       this.gegeweb3.currentProvider : 
                        new Web3.providers.HttpProvider(this.web3url));
       
    
