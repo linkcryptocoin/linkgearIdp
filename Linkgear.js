@@ -1,28 +1,36 @@
-// Linkgear Class
-// Author: Simon Li
-// Date: July 27, 2018
+// Purpose: Linkgear Class for encapsulating the web3 calls
+// Author : Simon Li
+// Date   : July 27, 2018
 // LinkGear Fundation, all  rights reserved
+
+// How to use this class:
+//const Linkgear = require('./Linkgear.js');
+//const linkgear = new Linkgear();
+//console.log(`The balance of ${addr} is ${linkgear.getBalance(addr)}`);
+
 "use strict";
 
 const fs = require('fs');
 
 class Linkgear {  
     constructor(iConfigFile) {
-       const configFile = (iConfigFile)? iConfigFile : '.configure.json'; 
-       this.config = JSON.parse(fs.readFileSync(configFile));
-       this.web3url = this.config.linkgear.web3url;
+        const configFile = (iConfigFile)? iConfigFile : '.configure.json'; 
+        const config = JSON.parse(fs.readFileSync(configFile));
+        const web3url = config.linkgear.web3url;
 
-       const Web3 = require('web3');
-       this.web3 = new Web3(typeof this.gegeweb3 !== 'undefined'? 
-                       this.web3.currentProvider : 
-                       new Web3.providers.HttpProvider(this.web3url));
+        const Web3 = require('web3');
+        this.web3 = new Web3(typeof this.web3 !== 'undefined'? 
+                        this.web3.currentProvider : 
+                        new Web3.providers.HttpProvider(web3url));
       
-       // Check the connectivity
+        // Check the connectivity
         if (this.web3.isConnected()) 
-           console.log(`web3.version: ${this.web3.version.api}`);
+            console.log(`web3.version: ${this.web3.version.api}`);
+        else
+            throw 'unable to connect Linkgear web3 service';
     }
 
-    //The balance for a linkgear account
+    //The balance for a linkgear account/address
     getBalance(account, more) {
         if (!account) return 0.00;
 
@@ -37,7 +45,7 @@ class Linkgear {
         return Number(this.web3.fromWei(weiValue));
     }
 
-    // Create an account
+    // Create an account/address
     newAccount(privateKey) {
         return this.web3.personal.newAccount(privateKey);
     }
@@ -45,8 +53,14 @@ class Linkgear {
     // pending transactions
     pendingTransactions() {
        return this.web3.eth.getBlock('pending').transactions;
+    }
+    
+    // get Transaction
+    getTransaction(txHash) {
+       return this.web3.eth.getTransaction(txHash)
     }   
+    
+    // More behaviors/methods...
 }
 
 module.exports = Linkgear
-           
