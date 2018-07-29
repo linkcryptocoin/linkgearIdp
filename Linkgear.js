@@ -50,9 +50,33 @@ class Linkgear {
         return this.web3.personal.newAccount(privateKey);
     }
    
-    // pending transactions
-    pendingTransactions() {
-       return this.web3.eth.getBlock('pending').transactions;
+    // pending transactions from address/account/hash/blockNumber
+    pendingTransactions(attr) {
+       const pendingTrans = this.web3.eth.getBlock('pending').transactions; 
+       if (!attr) 
+           return pendingTrans; // all pending transactions in Linkgear
+
+       var retTrans = [];
+       pendingTrans.forEach(function(tx) {
+           switch(typeof attr) { 
+               case 'string': // account/address/hash
+                   if (this.web3.isAddress(attr)) { // address/account 
+                       if (attr === this.web3.eth.getTransaction(tx).from) 
+                           retTrans.push(tx);
+                   }
+                   else { 
+                       if (attr === this.web3.eth.getTransaction(tx).hash) 
+                           retTrans.push(tx);
+                   }
+                   break;
+
+               case 'number': // blocknumber
+                   if (attr === this.web3.eth.getTransaction(tx).blockNumber) 
+                       retTrans.push(tx);
+                   break;
+           }  // switch 
+       })
+       return retTrans;
     }
     
     // get Transaction
