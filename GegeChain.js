@@ -181,7 +181,7 @@ class GegeChain {
         switch (action) {
             //temp reward update
             case 'login':
-                rule = { rewardToken: 20, limitPerDay: 300 }; break;
+                rule = { rewardToken: 300, limitPerDay: 1 }; break;
 
             case 'post':
                 rule = { rewardToken: 40, limitPerDay: 5 }; break;
