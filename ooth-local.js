@@ -522,9 +522,12 @@ module.exports = function ({
         // user send token to other user
         // userSendToken(userAddress,toAddress,token,sNodeAddress,userStartTime)
         registerMethod('t-userSendToken', requireLogged, function (req, res) {
-            const {userId, toAddress, token} = req.body;
+            const {userId, password, toAddress, token} = req.body;
  
             return getUserById(userId).then(user=> {
+                 if (password && !compareSync(password, user[name].password))
+                    throw new Error('Password not matching');
+
                  const result = linkgearPOS.userSendToken(user.local.account, 
                                          toAddress, token,
                                          user.local.snode, 
