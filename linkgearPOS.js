@@ -488,17 +488,17 @@ function handleChainPost(uAddr, sAddr, uStart, action) {
    var rule = {rewardToken: 0, limitPerDay: 0}; 
    switch(action) {
       case 'login':
-         rule = {rewardToken: 20, limitPerDay: 1}; break;
+         rule = {rewardToken: 10, limitPerDay: 1}; break;
       case 'post':
-         rule = {rewardToken: 40, limitPerDay: 5}; break;
+         rule = {rewardToken: 20, limitPerDay: 5}; break;
       case 'comment':
-         rule = {rewardToken: 40, limitPerDay: 5}; break;
+         rule = {rewardToken: 20, limitPerDay: 5}; break;
       case 'like':
-         rule = {rewardToken: 10, limitPerDay: 10}; break;
+         rule = {rewardToken: 5, limitPerDay: 10}; break;
       case 'dislike':
-         rule = {rewardToken: 10, limitPerDay: 10}; break;
+         rule = {rewardToken: 5, limitPerDay: 10}; break;
       case 'referral':
-         rule = {rewardToken: 20, limitPerDay: 99999}; break;
+         rule = {rewardToken: 10, limitPerDay: 99999}; break;
       default: 
          throw `ChainPost: "${action}" not supported`;  
    }
