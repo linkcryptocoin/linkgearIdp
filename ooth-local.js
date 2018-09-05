@@ -12,7 +12,7 @@ const HOUR = 1000 * 60 * 60;
 const tests = {
     username: {
         regex: /^[a-z][0-9a-z_]{3,19}$/,
-        error: 'Username must be all lowercase, contain only letters, numbers and _ (starting with a letter), and be between 4 and 20 characters long.'
+        error: 'Username must contain only letters, numbers and _ (starting with a letter), and be between 4 and 20 characters long.'
     },
     password: {
         test: password => /\d/.test(password) && /[a-z]/.test(password) && /[A-Z]/.test(password) && /.{6,}/.test(password),
@@ -101,10 +101,11 @@ module.exports = function ({
             usernameField: 'username',
             passwordField: 'password'
         }, nodeifyAsync((username, password) => {
-            return getUserByUniqueField('username', username).then(user => {
+            const l_username = username.toLowerCase();
+            return getUserByUniqueField('username', l_username).then(user => {
                 if (!user) {
                     //return getUserByUniqueField('email', username);
-                   return getUserByUniqueField('email', username.toLowerCase());
+                   return getUserByUniqueField('email', l_username);
                 } else {
                     return user;
                 }
@@ -192,25 +193,32 @@ module.exports = function ({
 
         registerMethod('register', requireNotLogged, function (req, res) {
             //console.log('Registration');
-            const { email, password, account, snode, dname } = req.body;
+            const {email,password,account,snode,dname,type,region} = req.body;
 
-            //console.log('Registration - check email');
+            // check the email
             if (typeof email !== 'string') {
                 throw new Error('Invalid email');
             }
+            testValue('email', email);
             
+            // Check the password
             if (typeof password !== 'string') {
                 throw new Error('Invalid password');
             }
-            
             testValue('password', password);
-            //console.log(`Registration - check password end`);
 
-            //console.log('Registration - check account begin');
+            // Check the username
+            const username = dname.toLowerCase();
+            if (typeof username !== 'string') {
+                throw new Error('Invalid data type of the user name');
+            }
+            //testValue('username', username);
+            if (linkgearPOS.hasUsername(username))
+                throw new Error('The user name has already been used.'); 
+
             // Validate the account if an account is passed
             if (account && !linkgearPOS.isAddress(account))
                 throw new Error(`Invalid gegeChain Account ${account}`);
-            //console.log('Registration - check account end');
 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
@@ -234,16 +242,20 @@ module.exports = function ({
                 const hashedPassword = hash(password);
                 insertUser({
                     email,
+                    username,
                     password: hashedPassword,
                     account: linkgearPOSAccount,
                     snode: snode,
                     dname: dname,
+                    type: type,
+                    region: region, 
                     createdAt: new Date(),
                     userStartTime: Date.now(),
                     logInTime: Date.now(),
                     verificationToken: hash(verificationToken),
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {
+                    linkgearPOS.addUsername(username); // add the user name
                     if (onRegister) {
                         onRegister({
                             _id,

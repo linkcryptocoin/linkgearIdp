@@ -39,9 +39,9 @@ MongoClient.connect(url, function(err, db) {
    const dbo = db.db("linkgear");
 
    if (noFile)
-       console.log("email,name,super node,created At,last Logged-on,account,token");
+       console.log("email,username,dname,super node,created At,last Logged-on,account,token");
    else
-       logger.write("email,name,super node,created At,last Logged-on,account,token\n");
+       logger.write("email,username,dname,super node,created At,last Logged-on,account,token\n");
 
    const query = {};
    dbo.collection("users").find(query, {"local.email":1,"local.dname":1,"local.snode":1,"local.createdAt":1,"local.logInTime":1,"local.account":1}).toArray(function(err, users) {
@@ -49,6 +49,7 @@ MongoClient.connect(url, function(err, db) {
   
        users.forEach(function(user) {
            const email = user.local.email;
+           const username = user.local.username;
            const dname = (user.local.dname)? user.local.dname : "";
            const snode = (user.local.snode)? user.local.snode : "";
            const createdAt = (user.local.createdAt)? user.local.createdAt : "";
@@ -59,10 +60,10 @@ MongoClient.connect(url, function(err, db) {
               balance = Number(gege.balanceOf(account));
            }
            if (noFile)
-              console.log(`${email},${dname},${snode},${createdAt},${logInTime}, ${account},${balance}`);
+              console.log(`${email},${username},${dname},${snode},${createdAt},${logInTime}, ${account},${balance}`);
            else
               //logger.write(`${account},${bal}\n`);
-              logger.write(`${email},${dname},${snode},${createdAt},${logInTime},${account},${balance}\n`);
+              logger.write(`${email},${username},${dname},${snode},${createdAt},${logInTime},${account},${balance}\n`);
            
        });      
        db.close();

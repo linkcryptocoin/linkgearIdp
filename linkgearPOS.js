@@ -31,8 +31,30 @@ module.exports.gegeweb3 = function() { return gegeweb3;}
 
 // We need a mongodb Client to do some db stuff
 var dbo = null;
+const userNameSet = new Set();
 module.exports.setMongoDbo = function(db) { 
    if (!dbo) dbo = db;
+   
+   dbo.collection("users").find({}, {"local.username":1, _id:0}).toArray(function(err, users) {
+       if (err) throw err;
+
+       users.forEach(function(user) {
+          if (user.local.username)
+             userNameSet.add(user.local.username);
+       });
+       //for (var it = userNameSet.values(), val= null; val=it.next().value;)
+       //    console.log(val);
+   });
+}
+
+// Check the existence of a user name
+module.exports.hasUsername = function(username) { 
+   return userNameSet.has(username);
+}
+
+// Add a user name to the set
+module.exports.addUsername = function(username) { 
+   userNameSet.add(username);  // add it 
 }
 
 module.exports.trackLogInTime = function(userId, newLogInTime) {
