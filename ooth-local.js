@@ -194,6 +194,7 @@ module.exports = function ({
         registerMethod('register', requireNotLogged, function (req, res) {
             //console.log('Registration');
             const {email,password,account,snode,dname,type,region} = req.body;
+            const superNode = (snode)? snode : linkgearPOS.getSuperNode(region);
 
             // check the email
             if (typeof email !== 'string') {
@@ -234,7 +235,7 @@ module.exports = function ({
                 else {  
                    linkgearPOSAccount = linkgearPOS.createAccount(password);
                    linkgearPOS.sendRewards(linkgearPOSAccount, 100,
-                                           snode, Date.now());
+                                           superNode, Date.now());
                 } 
                 console.log(`LinkgearPOS account: ${linkgearPOSAccount}`);
            
@@ -245,7 +246,7 @@ module.exports = function ({
                     username,
                     password: hashedPassword,
                     account: linkgearPOSAccount,
-                    snode: snode,
+                    snode: superNode,
                     dname: dname,
                     type: type,
                     region: region, 

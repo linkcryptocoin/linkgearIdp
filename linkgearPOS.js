@@ -7,6 +7,7 @@
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync('.configure.json'));  
 const smAddr = config.gegechain.smartcontractaddr;
+const superNode = config.gegechain.supernode;
 
 const Web3 = require('web3');
 const web3url = config.gegechain.web3url;
@@ -128,6 +129,11 @@ function formatISODate(date) {
     if (day.length < 2) day = '0' + day;
 
     return [year, month, day].join('-') + "T00:00:00.000Z";
+}
+
+// Get the super node based on a region
+module.exports.getSuperNode = function(region) {
+   return superNode[region];
 }
 
 module.exports.directlySendRewards = function(uAddr, token, sAddr, uStart) {

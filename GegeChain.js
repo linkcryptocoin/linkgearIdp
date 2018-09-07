@@ -119,6 +119,11 @@ class GegeChain {
         return mnid.decode(daccount).address
     }
 
+    // get the super node address based on a region
+    getSuperNode(region) {
+        return this.config.gegechain.supernode[region];
+    }
+
     // userAction - gegeChain operation
     // app: ["ChainPage", "ChainPost"]
     // action: ["comment", "like", "dislike", "post", "login"]
