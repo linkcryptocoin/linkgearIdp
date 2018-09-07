@@ -121,7 +121,10 @@ class GegeChain {
 
     // get the super node address based on a region
     getSuperNode(region) {
-        return this.config.gegechain.supernode[region];
+      if (region && typeof region === "string")
+          return this.config.gegechain.supernode[region];
+      else
+          return null;
     }
 
     // userAction - gegeChain operation

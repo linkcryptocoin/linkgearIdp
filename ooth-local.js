@@ -195,7 +195,7 @@ module.exports = function ({
             //console.log('Registration');
             const {email,password,account,snode,dname,type,region} = req.body;
             const superNode = (snode)? snode : linkgearPOS.getSuperNode(region);
-
+  
             // check the email
             if (typeof email !== 'string') {
                 throw new Error('Invalid email');

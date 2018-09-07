@@ -133,7 +133,10 @@ function formatISODate(date) {
 
 // Get the super node based on a region
 module.exports.getSuperNode = function(region) {
-   return superNode[region];
+   if (region && typeof region === "string")
+      return superNode[region];
+   else
+      return null;
 }
 
 module.exports.directlySendRewards = function(uAddr, token, sAddr, uStart) {
