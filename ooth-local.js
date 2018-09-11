@@ -111,7 +111,7 @@ module.exports = function ({
                 }
             }).then(user => {
                 if (!user) {
-                    throw new Error('Incorrect email or username.');
+                    throw new Error('Incorrect email or user name.');
                 }
 
                 if (!user[name]) {
@@ -215,15 +215,15 @@ module.exports = function ({
             }
             //testValue('username', username);
             if (linkgearPOS.hasUsername(username))
-                throw new Error('The user name has already been used.'); 
+                throw new Error(`The user name "${username}" has already been used, please choose another one.`); 
 
             // Validate the account if an account is passed
             if (account && !linkgearPOS.isAddress(account))
-                throw new Error(`Invalid gegeChain Account ${account}`);
+                throw new Error(`Invalid gegeChain Account: ${account}`);
 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
-                    throw new Error('This email is already registered.');
+                    throw new Error(`The email "${email}" has already been registered, please choose another one.`);
                 }
                  
                 // LinkgearPOSa Account
