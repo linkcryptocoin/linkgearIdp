@@ -9,6 +9,14 @@ const config = JSON.parse(fs.readFileSync('.configure.json'));
 const smAddr = config.gegechain.smartcontractaddr;
 const superNode = config.gegechain.supernode;
 
+// email 
+// Load the AWS SDK for Node.js
+const AWS = require('aws-sdk');
+
+// Set the region 
+AWS.config.update({region: 'us-east-1'});
+AWS.config.credentials = new AWS.SharedIniFileCredentials();
+
 const Web3 = require('web3');
 const web3url = config.gegechain.web3url;
 var gegeweb3 = new Web3(typeof gegeweb3 !== 'undefined'? gegeweb3.currentProvider : 
@@ -695,4 +703,56 @@ module.exports.web3call = function(web3Func, args) {
         default:
             throw `${web3Func} is not supported`;
     }
+}
+
+// Aws Email: receiver, subject, message
+module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
+   // Create sendEmail params 
+   const currentDate = new Date().toDateString();
+   const currentTime = new Date().toLocaleTimeString();
+   const sender = (iSender)? iSender : 'support@linkgear.io';
+   const receiver = iReceiver; // 'linkgeardev@gmail.com';
+   const subject = `${iSubject} at ${currentTime} on ${currentDate}`;
+   const message = `${iMessage}`;
+
+   const params = {
+       Destination: { /* required */
+           ToAddresses: [
+                      `${receiver}`
+           ]
+       },
+       Message: { /* required */
+           Body: { /* required */
+              Html: {
+                  Charset: "UTF-8",
+                  Data: `${message}`
+              },
+              Text: {
+                  Charset: "UTF-8",
+                  Data: `${message}`
+              }
+           },
+           Subject: {
+              Charset: 'UTF-8',
+              Data: `${subject}`  /* 'Test email from server' */
+           }
+       },
+       Source: `${sender}`,   //'support@linkgear.io', /* required */
+       ReplyToAddresses: [
+       ],
+   };
+   
+   // Create the promise and SES service object
+   const sendPromise = new AWS.SES({apiVersion: '2012-10-17'}).sendEmail(params).promise();
+
+   // Handle promise's fulfilled/rejected states
+  sendPromise.then(function(data) {
+      console.log(`email sent to ${receiver}:  ${data.MessageId}`);
+      return {result: true, message: `An email sent to ${receiver}`};
+  }).catch(function(err) {
+      console.error(err, err.stack);
+      return {result: false, message: `${err.stack}`};
+  });
+  
+  return {result: true, message: `An email will be sent to ${receiver}`};
 }

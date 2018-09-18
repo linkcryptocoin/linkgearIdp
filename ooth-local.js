@@ -467,6 +467,20 @@ module.exports = function ({
             });
         });
         
+        // Aws email
+        //
+        registerMethod('t-sendEmail', requireLogged, function (req, res) {
+            const {userId, receiver, subject, message} = req.body;
+            if (!userId) {
+               return linkgearPOS.sendAwsEmail(receiver,subject,message);
+            }
+            else {
+               return getUserById(userId).then(user=> {
+                    return res.send(linkgearPOS.sendAwsEmail(receiver,subject,message, user.local.email));
+               });
+            }
+        });
+        
         // Link the account - smart contract
         //
         registerMethod('t-add', requireLogged, function (req, res) {

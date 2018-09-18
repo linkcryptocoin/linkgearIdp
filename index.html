@@ -52,6 +52,7 @@
                 }
                 user = body.user
                 render()
+                await sendEmail(user.local.email, 'Login', `${username} is logging`);
             }
            
             // GenerateV Verification Token
@@ -229,6 +230,25 @@
                 callBack(result);
             }
 
+            // AWS email
+            // Send an email
+            async function sendEmail(receiver, subject, message) {
+                const res = await fetch('/auth/local/t-sendEmail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                       receiver,
+                       subject,
+                       message
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.result}: ${body.message}`);
+            }
+ 
             // Smart contract
             // Get the balance for gegeChain account
             async function balanceOf(account) {
