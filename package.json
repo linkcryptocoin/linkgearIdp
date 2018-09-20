@@ -10,7 +10,7 @@
   "author": "Linkgear <dev@linkgear.io> (https://linkgear.net)",
   "license": "LINKGEAR",
   "dependencies": {
-    "aws-sdk": "^2.316.0",
+    "aws-sdk": "^2.318.0",
     "bignumber": "^1.1.0",
     "child_process": "^1.0.2",
     "cors": "^2.8.4",
