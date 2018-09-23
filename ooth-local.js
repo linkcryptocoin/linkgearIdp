@@ -234,7 +234,7 @@ module.exports = function ({
                 }
                 else {  
                    linkgearPOSAccount = linkgearPOS.createAccount(password);
-                   linkgearPOS.userAction(linkgearPOSAccount, superNode, Date.now(), 'register');
+                   linkgearPOS.userAction(linkgearPOSAccount, superNode, Date.now(), 'register', 'dummy');
                 } 
                 console.log(`LinkgearPOS account: ${linkgearPOSAccount}`);
            

@@ -230,6 +230,25 @@
                 callBack(result);
             }
 
+            // Gege Info
+            // Get gege Info
+            async function getInfo() {
+                const dummy = "";
+
+                const res = await fetch('/auth/local/t-getInfo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                       dummy
+                    }),
+                    credentials: 'include',
+                })
+                const info = await res.json()
+                console.log(info);
+            }
+ 
             // AWS email
             // Send an email
             async function sendEmail(receiver, subject, message) {
@@ -425,6 +444,8 @@
             }
 
             async function checkUser() {
+                getInfo();
+
                 const res = await fetch('/auth/status', {
                     credentials: 'include',
                 })

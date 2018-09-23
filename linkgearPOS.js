@@ -6,6 +6,9 @@
 
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync('.configure.json'));  
+//console.log(config.gegechain.rewards.register * 2);
+//console.log(config.gegechain.rewards.actionratio * 2);
+
 const smAddr = config.gegechain.smartcontractaddr;
 const superNode = config.gegechain.supernode;
 
@@ -466,9 +469,14 @@ module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
    var ret;
    switch(appStr) {
        case 'register':  // New registration
-          const regToken = 100;  // Registration rewars
-          ret = {result: gegePOS.sendRewards(uAddr, regToken, sAddr, uStart),  
+          var regToken = 100;
+          if (config.gegechain.rewards.register > regToken) // Registration rewards
+             regToken = config.gegechain.rewards.register; // Overwrite if > 100
+          //console.log(`Register reward: ${regToken} to ${uAddr}`);
+
+          ret = {result: gegePOS.sendRewards(uAddr, regToken, sAddr, timeStamp),  
                  message: `Resgiter reward ${regToken} tokens has been added to account ${uAddr}`};
+          //console.log(`result = ${ret.result}, message = ${ret.message}`);
           break;
  
        case '1':
@@ -518,6 +526,7 @@ function handleChainPage(uAddr, sAddr, uStart, action) {
 // Handle the ChainPost request
 function handleChainPost(uAddr, sAddr, uStart, action) {
    var rule = {rewardToken: 0, limitPerDay: 0}; 
+   
    switch(action) {
       case 'login':
          rule = {rewardToken: 10, limitPerDay: 1}; break;
@@ -534,7 +543,11 @@ function handleChainPost(uAddr, sAddr, uStart, action) {
       default: 
          throw `ChainPost: "${action}" not supported`;  
    }
-     
+   // Recalculate the rewards based on the comfigure
+   const rewardRatio = (config.gegechain.rewards.actionratio > 1)? config.gegechain.rewards.actionratio : 1;
+   rule.rewardToken *= rewardRatio;    
+   //console.log(`action = ${action}, rewardRatio = ${rewardRatio}, rewardToken = ${rule.rewardToken}`);
+ 
    // Check the daily limitation
    const dateEnd = new Date();   // current time
    const dateBegin = new Date(formatISODate());  // The beginning of Today
