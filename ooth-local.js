@@ -234,8 +234,7 @@ module.exports = function ({
                 }
                 else {  
                    linkgearPOSAccount = linkgearPOS.createAccount(password);
-                   linkgearPOS.sendRewards(linkgearPOSAccount, 100,
-                                           superNode, Date.now());
+                   linkgearPOS.userAction(linkgearPOSAccount, superNode, Date.now(), 'register');
                 } 
                 console.log(`LinkgearPOS account: ${linkgearPOSAccount}`);
            
@@ -489,6 +488,12 @@ module.exports = function ({
             return res.send({ message: 'Add for testing', result: result });
         });
         
+        // Get GegeChain Info
+        // 
+        registerMethod('t-getInfo', function (req, res) {
+            return res.send(linkgearPOS.getGegeInfo());
+        });
+
         // Balance of the account
         // balanceOf(addr)
         registerMethod('t-balanceOf', requireLogged, function (req, res) {

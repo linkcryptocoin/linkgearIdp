@@ -56,6 +56,15 @@ module.exports.setMongoDbo = function(db) {
    });
 }
 
+// Get the GegeChain info including supernode, ...
+module.exports.getGegeInfo = function() {
+   const gegeInfo = {
+            "supernodes": []
+         }
+   gegeInfo.supernodes = Object.values(config.gegechain.supernodelist);
+   return gegeInfo;
+}
+
 // Check the existence of a user name
 module.exports.hasUsername = function(username) { 
    return userNameSet.has(username);
@@ -443,7 +452,7 @@ function isChecksumAddress(address) {
 module.exports.isAddress = isAddress;
 
 // userAction - gegeChain operation
-// app: ["ChainPage", "ChainPost"]
+// app: [""Register", ChainPage", "ChainPost"]
 // action: ["comment", "like", "dislike", "post", "login"]
 // uAddr - address/account, sAddr - super node, uStart - start time
 module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
@@ -456,6 +465,12 @@ module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
    const appStr = (typeof app === 'string')? app.toLowerCase() : "" + app;
    var ret;
    switch(appStr) {
+       case 'register':  // New registration
+          const regToken = 100;  // Registration rewars
+          ret = {result: gegePOS.sendRewards(uAddr, regToken, sAddr, uStart),  
+                 message: `Resgiter reward ${regToken} tokens has been added to account ${uAddr}`};
+          break;
+ 
        case '1':
        case 'chainpage':
           ret = handleChainPage(uAddr, sAddr, timeStamp, action.toLowerCase());
