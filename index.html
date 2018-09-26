@@ -198,6 +198,30 @@
                 const body = await res.json()
                 alert(body.message) 
             }
+             
+            // Update user profile
+            async function onUpdateUser(e) {
+                e.preventDefault();
+                const user = await getUser()
+                const userId = user._id;
+                const type = 'Business';
+                const region = 'Toronto';
+ 
+                const res = await fetch('/auth/local/updateUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                          userId,
+                          type,
+                          region
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(body.message) 
+            }
 
             function onWeb3call(e) {
                 e.preventDefault();

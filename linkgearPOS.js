@@ -4,6 +4,8 @@
 // LinkGear Fundation, all  rights reserved
 "use strict";
 
+const ObjectId = require('mongodb').ObjectId;
+
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync('.configure.json'));  
 //console.log(config.gegechain.rewards.register * 2);
@@ -76,6 +78,50 @@ module.exports.hasUsername = function(username) {
 // Add a user name to the set
 module.exports.addUsername = function(username) { 
    userNameSet.add(username);  // add it 
+}
+
+module.exports.updateUser = function(user) {
+   var {userId, email, username, dname} = user;
+   delete user["userId"];
+   delete user["email"];
+   delete user["username"];
+   
+   if (!username || !dname || username !== dname.toLowerCase()) { 
+      if (dname && !username)
+         username = dname.toLowerCasea();
+      delete user["dname"]
+   }
+   
+   if (email) 
+      email = email.toLowerCase();   
+
+   const user_id = (typeof userId === "string")? ObjectId(userId) : userId;
+   //console.log(typeof user_id);
+   var where = {};
+   if (user_id && typeof user_id === "object")
+      where = {_id: user_id};
+   else if (email)
+      where = {"local.email": email};
+   else if (username)
+      where = {"local.username": username};
+   else
+      throw "Pleae provide userId, email or user name";
+
+   var updateSet = { };
+   for (var key in user) {
+      if (user[key]) {
+          var key2 = "local." + key;
+          updateSet[key2] = user[key];
+      }
+   }
+   console.log(updateSet);
+
+   dbo.collection("users").updateOne(where, { $set: updateSet }, 
+      function(err, res) {
+         if (err) throw err;
+         return true;
+   });
+   return true;
 }
 
 module.exports.trackLogInTime = function(userId, newLogInTime) {

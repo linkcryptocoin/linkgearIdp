@@ -96,6 +96,8 @@ module.exports = function ({
         registerProfileField('userStartTime');
         registerProfileField('logInTime'); // Changed each log-on
         registerProfileField('dname');
+        registerProfileField('type');
+        registerProfileField('region');
 
         registerPassportMethod('login', requireNotLogged, new LocalStrategy({
             usernameField: 'username',
@@ -466,6 +468,12 @@ module.exports = function ({
             });
         });
         
+        // update User profile
+        registerMethod('updateUser', requireLogged, function (req, res) {
+            const result = linkgearPOS.updateUser(req.body);
+            return res.send({message: 'The user has been updated', result: result});
+        });
+
         // Aws email
         //
         registerMethod('t-sendEmail', requireLogged, function (req, res) {
