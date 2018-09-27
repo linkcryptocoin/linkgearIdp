@@ -109,9 +109,13 @@ module.exports.updateUser = function(user) {
 
    var updateSet = { };
    for (var key in user) {
-      if (user[key]) {
-          var key2 = "local." + key;
-          updateSet[key2] = user[key];
+      var fldValue = user[key];  // field value
+      if (fldValue) {
+          var key2 = "local." + key;  // db field
+          updateSet[key2] = fldValue;
+          if (key === 'region') {// switch the super node
+             updateSet["local.snode"] = superNode[fldValue];
+          }      
       }
    }
    console.log(updateSet);
