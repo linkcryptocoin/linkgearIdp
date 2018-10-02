@@ -785,21 +785,42 @@ module.exports.web3call = function(web3Func, args) {
 
 // Aws Email: receiver, subject, message
 module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
-   // Create sendEmail params 
-   const receiver = iReceiver.toLowerCase(); // 'linkgeardev@gmail.com';
-   
+   var receiver = iReceiver; // pass the data type implicitly
+   if (typeof iReceiver === 'string')
+       receiver = iReceiver.toLowerCase();
+   else // an array for multiple emails or user names
+       for (var idx = 0; idx < receiver.length; idx++) 
+           receiver[idx] = iReceiver[idx].toLowerCase();
+
    if (receiver.indexOf('@') == -1) { // user name
-      dbo.collection("users").findOne({"local.username": receiver}, function(err, user) {
-          if (err) throw err;
-          //console.log(`user name is ${user.local.username}`);
-          return sendAwsEmailInt(user.local.email, iSubject, iMessage, iSender);
-      });
+      if (typeof receiver === 'string') { // single user name
+         dbo.collection("users").findOne({"local.username": receiver}, function(err, user) {
+             if (err) throw err;
+             //console.log(`user name is ${user.local.username}`);
+             return sendAwsEmailInt(user.local.email, iSubject, iMessage, iSender);
+         });
+      }
+      else { 
+         dbo.collection("users").find({"local.username": {$in: receiver}}).toArray(function(err, users) {
+             if (err) throw err;
+
+             const arrReceiver = [];
+             users.forEach(function(user) {
+                 if (user.local.username)
+                     arrReceiver.push(user.local.email);
+             });
+
+             return sendAwsEmailInt(arrReceiver, iSubject, iMessage, iSender);
+         });
+      }     
       return {result: true, message: `An email will be sent to ${receiver}`};
    }
    return sendAwsEmailInt(receiver, iSubject, iMessage, iSender);
 }
+
 // Send ae email via aws
 function sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
+   // Create sendEmail params 
    const currentDate = new Date().toDateString();
    const currentTime = new Date().toLocaleTimeString();
    const sender = (iSender)? iSender : 'support@linkgear.io';
