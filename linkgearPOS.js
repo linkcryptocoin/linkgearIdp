@@ -786,18 +786,30 @@ module.exports.web3call = function(web3Func, args) {
 // Aws Email: receiver, subject, message
 module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
    // Create sendEmail params 
+   const receiver = iReceiver.toLowerCase(); // 'linkgeardev@gmail.com';
+   
+   if (receiver.indexOf('@') == -1) { // user name
+      dbo.collection("users").findOne({"local.username": receiver}, function(err, user) {
+          if (err) throw err;
+          //console.log(`user name is ${user.local.username}`);
+          return sendAwsEmailInt(user.local.email, iSubject, iMessage, iSender);
+      });
+      return {result: true, message: `An email will be sent to ${receiver}`};
+   }
+   return sendAwsEmailInt(receiver, iSubject, iMessage, iSender);
+}
+// Send ae email via aws
+function sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
    const currentDate = new Date().toDateString();
    const currentTime = new Date().toLocaleTimeString();
    const sender = (iSender)? iSender : 'support@linkgear.io';
-   const receiver = iReceiver; // 'linkgeardev@gmail.com';
    const subject = `${iSubject} at ${currentTime} on ${currentDate}`;
    const message = `${iMessage}`;
+   const arrReceiver = (typeof receiver === 'string')? [receiver] : receiver;
 
    const params = {
        Destination: { /* required */
-           ToAddresses: [
-                      `${receiver}`
-           ]
+           ToAddresses: arrReceiver
        },
        Message: { /* required */
            Body: { /* required */
