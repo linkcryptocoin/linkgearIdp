@@ -785,15 +785,25 @@ module.exports.web3call = function(web3Func, args) {
 
 // Aws Email: receiver, subject, message
 module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
+   var bMultiEntries = false;
+   var bUserNameUsed = false;
    var receiver = iReceiver; // pass the data type implicitly
-   if (typeof iReceiver === 'string')
+   if (typeof iReceiver === 'string') {
        receiver = iReceiver.toLowerCase();
-   else // an array for multiple emails or user names
-       for (var idx = 0; idx < receiver.length; idx++) 
+       if (receiver.indexOf('@') == -1)  // a user name does not contain @
+           bUserNameUsed = true;
+   }        
+   else { // an array for multiple emails or user names
+       bMultiEntries = true;
+       for (var idx = 0; idx < receiver.length; idx++) { 
            receiver[idx] = iReceiver[idx].toLowerCase();
+           if (receiver[idx].indexOf('@') == -1)
+              bUserNameUsed = true; 
+       }
+   }
 
-   if (receiver.indexOf('@') == -1) { // user name
-      if (typeof receiver === 'string') { // single user name
+   if (bUserNameUsed) { // user name
+      if (!bMultiEntries) { // single user name
          dbo.collection("users").findOne({"local.username": receiver}, function(err, user) {
              if (err) throw err;
              //console.log(`user name is ${user.local.username}`);
@@ -803,11 +813,9 @@ module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
       else { 
          dbo.collection("users").find({"local.username": {$in: receiver}}).toArray(function(err, users) {
              if (err) throw err;
-
              const arrReceiver = [];
              users.forEach(function(user) {
-                 if (user.local.username)
-                     arrReceiver.push(user.local.email);
+                 arrReceiver.push(user.local.email);
              });
 
              return sendAwsEmailInt(arrReceiver, iSubject, iMessage, iSender);

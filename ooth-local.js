@@ -215,6 +215,9 @@ module.exports = function ({
             if (typeof username !== 'string') {
                 throw new Error('Invalid data type of the user name');
             }
+            if (username.indexOf('@') != -1)
+                throw new Error('@ is not allowed in the user name');
+
             //testValue('username', username);
             if (linkgearPOS.hasUsername(username))
                 throw new Error(`The user name "${username}" has already been used, please choose another one.`); 
