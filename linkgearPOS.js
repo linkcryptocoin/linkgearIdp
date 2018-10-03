@@ -1,15 +1,13 @@
-// LinkgearPOS: gegeChain Web3 activities
+// LinkgearPOS: APIs and gegeChain Web3 activities
 // Author: Simon Li
 // Date: May 17, 2018
-// LinkGear Fundation, all  rights reserved
+// LinkGear Fundation, all rights reserved
 "use strict";
 
 const ObjectId = require('mongodb').ObjectId;
 
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync('.configure.json'));  
-//console.log(config.gegechain.rewards.register * 2);
-//console.log(config.gegechain.rewards.actionratio * 2);
 
 const smAddr = config.gegechain.smartcontractaddr;
 const superNode = config.gegechain.supernode;
@@ -19,7 +17,8 @@ const superNode = config.gegechain.supernode;
 const AWS = require('aws-sdk');
 
 // Set the region 
-AWS.config.update({region: 'us-east-1'});
+//AWS.config.update({region: 'us-east-1'});
+AWS.config.update({region: config.sys.awsregion});
 AWS.config.credentials = new AWS.SharedIniFileCredentials();
 
 const Web3 = require('web3');
@@ -118,7 +117,7 @@ module.exports.updateUser = function(user) {
           }      
       }
    }
-   console.log(updateSet);
+   //console.log(updateSet);
 
    dbo.collection("users").updateOne(where, { $set: updateSet }, 
       function(err, res) {
@@ -783,24 +782,36 @@ module.exports.web3call = function(web3Func, args) {
     }
 }
 
+// Valid email address based on our pattern?
+module.exports.isValidEmail = function(emailStr) {
+   if (typeof emailStr != 'string')
+      throw 'Invalid email type';
+
+   const emailPattern = /^.+@.+\..+$/;
+   return emailPattern.test(emailStr);
+}
+
 // Aws Email: receiver, subject, message
 module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
+
    var bMultiEntries = false;
    var bUserNameUsed = false;
    var receiver = iReceiver; // pass the data type implicitly
    if (typeof iReceiver === 'string') {
        receiver = iReceiver.toLowerCase();
-       if (receiver.indexOf('@') == -1)  // a user name does not contain @
+       if (!this.isValidEmail(receiver))  // a user name
            bUserNameUsed = true;
    }        
-   else { // an array for multiple emails or user names
+   else if (Array.isArray(receiver)) { // an array for multiple emails or user names
        bMultiEntries = true;
        for (var idx = 0; idx < receiver.length; idx++) { 
            receiver[idx] = iReceiver[idx].toLowerCase();
-           if (receiver[idx].indexOf('@') == -1)
+           if (!this.isValidEmail(receiver[idx]))
               bUserNameUsed = true; 
        }
    }
+   else
+       throw 'The receiver type is not support';
 
    if (bUserNameUsed) { // user name
       if (!bMultiEntries) { // single user name
@@ -823,7 +834,8 @@ module.exports.sendAwsEmail = function(iReceiver, iSubject, iMessage, iSender) {
       }     
       return {result: true, message: `An email will be sent to ${receiver}`};
    }
-   return sendAwsEmailInt(receiver, iSubject, iMessage, iSender);
+   else
+      return sendAwsEmailInt(receiver, iSubject, iMessage, iSender);
 }
 
 // Send ae email via aws
@@ -834,7 +846,7 @@ function sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
    const sender = (iSender)? iSender : 'support@linkgear.io';
    const subject = `${iSubject} at ${currentTime} on ${currentDate}`;
    const message = `${iMessage}`;
-   const arrReceiver = (typeof receiver === 'string')? [receiver] : receiver;
+   const arrReceiver = (Array.isArray(receiver))? receiver : [receiver];
 
    const params = {
        Destination: { /* required */

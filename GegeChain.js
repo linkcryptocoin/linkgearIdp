@@ -7,6 +7,11 @@
 const fs = require('fs');
 const mnid = require('mnid');
 
+// Load the AWS SDK for Node.js
+const AWS = require('aws-sdk');
+
+const userNameSet = new Set();
+
 class GegeChain {
     constructor(iConfigFile) {
         const configFile = (iConfigFile) ? iConfigFile : '.configure.json';
@@ -17,8 +22,14 @@ class GegeChain {
         this.defaultGas = this.config.gegechain.defaultgas;
         this.defaultSNode = this.config.gegechain.defaultsnode;
 
-        const Web3 = require('web3');
+        this.dbo = null;
+        
+        // email 
+        // Set the region 
+        AWS.config.update({region: this.config.sys.awsregion});
+        AWS.config.credentials = new AWS.SharedIniFileCredentials();
 
+        const Web3 = require('web3');
         this.gegeweb3 = new Web3(typeof this.gegeweb3 !== 'undefined' ?
             this.gegeweb3.currentProvider :
             new Web3.providers.HttpProvider(this.web3url));
@@ -45,6 +56,87 @@ class GegeChain {
 
     // Check the address/account
     isAddress(addr) { return this.gegeweb3.isAddress(addr) }
+
+    // Set a DB handler
+    setMongoDbo(db) { 
+        if (!this.dbo) this.dbo = db;
+        this.addUsername("Simon");
+   
+        this.dbo.collection("users").find({}, {"local.username":1, _id:0}).toArray(function(err, users) {
+            if (err) throw err;
+
+            users.forEach(function(user) {
+               if (user.local.username)
+                  userNameSet.add(user.local.username);
+            });
+        });
+    }
+
+    // Get the GegeChain info including supernode, ...
+    getGegeInfo() {
+        const gegeInfo = {
+                 "supernodes": []
+              }
+        gegeInfo.supernodes = Object.values(config.gegechain.supernodelist);
+        return gegeInfo;
+    }
+
+    // Check the existence of a user name
+    hasUsername(username) { 
+        return userNameSet.has(username);
+    }
+
+    // Add a user name to the set
+    addUsername(username) { 
+        userNameSet.add(username);  // add it 
+    }
+
+    updateUser(user) {
+        var {userId, email, username, dname} = user;
+        delete user["userId"];
+        delete user["email"];
+        delete user["username"];
+   
+        if (!username || !dname || username !== dname.toLowerCase()) { 
+            if (dname && !username)
+                username = dname.toLowerCasea();
+            delete user["dname"]
+        }
+   
+        if (email) 
+            email = email.toLowerCase();   
+
+        const user_id = (typeof userId === "string")? ObjectId(userId) : userId;
+        //console.log(typeof user_id);
+        var where = {};
+        if (user_id && typeof user_id === "object")
+            where = {_id: user_id};
+        else if (email)
+            where = {"local.email": email};
+        else if (username)
+            where = {"local.username": username};
+        else
+            throw "Pleae provide userId, email or user name";
+
+        var updateSet = { };
+        for (var key in user) {
+            var fldValue = user[key];  // field value
+            if (fldValue) {
+                var key2 = "local." + key;  // db field
+                updateSet[key2] = fldValue;
+                if (key === 'region') {// switch the super node
+                    updateSet["local.snode"] = superNode[fldValue];
+                }      
+            }
+        }
+        //console.log(updateSet);
+
+        this,dbo.collection("users").updateOne(where, { $set: updateSet }, function(err, res) {
+            if (err) throw err;
+            return true;
+        });
+        return true;
+    }
 
     // Create an account
     createAccount(privateKey) {
@@ -425,7 +517,115 @@ class GegeChain {
                 throw `${func} is not supported`;
         }
     }
+    
+    // Valid email address based on our pattern?
+    isValidEmail(emailStr) {
+        if (typeof emailStr != 'string')
+           throw 'Invalid email type';
 
+        const emailPattern = /^.+@.+\..+$/;
+        return emailPattern.test(emailStr);
+    }
+
+    // Send ae email via aws
+    sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
+       // Create sendEmail params 
+       const currentDate = new Date().toDateString();
+       const currentTime = new Date().toLocaleTimeString();
+       const sender = (iSender)? iSender : 'support@linkgear.io';
+       const subject = `${iSubject} at ${currentTime} on ${currentDate}`;
+       const message = `${iMessage}`;
+       const arrReceiver = (Array.isArray(receiver))? receiver : [receiver];
+
+       const params = {
+           Destination: { /* required */
+               ToAddresses: arrReceiver
+           },
+           Message: { /* required */
+               Body: { /* required */
+                   Html: {
+                       Charset: "UTF-8",
+                       Data: `${message}`
+                   },
+                   Text: {
+                       Charset: "UTF-8",
+                       Data: `${message}`
+                   }
+               },
+               Subject: {
+                   Charset: 'UTF-8',
+                   Data: `${subject}`  /* 'Test email from server' */
+               }
+           },
+           Source: `${sender}`,   //'support@linkgear.io', /* required */
+           ReplyToAddresses: [
+           ],
+       };
+   
+       // Create the promise and SES service object
+       const sendPromise = new AWS.SES({apiVersion: '2012-10-17'}).sendEmail(params).promise();
+
+       // Handle promise's fulfilled/rejected states
+       sendPromise.then(function(data) {
+           console.log(`email sent to ${receiver}:  ${data.MessageId}`);
+           return {result: true, message: `An email sent to ${receiver}`};
+       }).catch(function(err) {
+           console.error(err, err.stack);
+           return {result: false, message: `${err.stack}`};
+       });
+  
+       return {result: true, message: `An email will be sent to ${receiver}`};
+    }
+    
+    // Aws Email: receiver, subject, message
+    sendAwsEmail(iReceiver, iSubject, iMessage, iSender) {
+       var emailFunc = this.sendAwsEmailInt;  
+
+       var bMultiEntries = false;
+       var bUserNameUsed = false;
+       var receiver = iReceiver; // pass the data type implicitly
+
+       if (typeof iReceiver === 'string') {
+           receiver = iReceiver.toLowerCase();
+           if (!this.isValidEmail(receiver))  // a user name
+               bUserNameUsed = true;
+       }        
+       else if (Array.isArray(receiver)) { // an array for multiple emails or user names
+           bMultiEntries = true;
+           for (var idx = 0; idx < receiver.length; idx++) { 
+              receiver[idx] = iReceiver[idx].toLowerCase();
+              if (!this.isValidEmail(receiver[idx]))
+                 bUserNameUsed = true; 
+           }   
+       }
+       else
+           throw 'The receiver type is not support';
+
+       if (bUserNameUsed) { // user name
+          if (!bMultiEntries) { // single user name
+             this.dbo.collection("users").findOne({"local.username": receiver}, function(err, user) {
+                 if (err) throw err;
+                 console.log(`user name is ${user.local.username}`);
+                 return emailFunc(user.local.email, iSubject, iMessage, iSender);
+             });
+          }
+          else { 
+             this.dbo.collection("users").find({"local.username": {$in: receiver}}).toArray(function(err, users) {
+                 if (err) throw err;
+                 const arrReceiver = [];
+                 users.forEach(function(user) {
+                     arrReceiver.push(user.local.email);
+                 });
+
+                 return emailFunc(arrReceiver, iSubject, iMessage, iSender);
+             });
+          } 
+       } 
+       else   
+          return emailFunc(receiver, iSubject, iMessage, iSender);
+    }
+
+    // More
 }
 
 module.exports = GegeChain
