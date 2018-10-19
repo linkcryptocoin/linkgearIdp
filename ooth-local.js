@@ -110,19 +110,28 @@ module.exports = function ({
                     //return getUserByUniqueField('email', username);
                    return getUserByUniqueField('email', l_username);
                 } else {
+                    if (typeof user.local.active !== 'undefined' && !user.local.active) {
+                       //linkgearPOS.emailActivation(username);  
+                       throw new Error(`The user has not been activated. Please check your email ${user.local.email}.`);
+                    }
+ 
                     return user;
                 }
             }).then(user => {
                 if (!user) {
                     throw new Error('Incorrect email or user name.');
                 }
-
+                 
                 if (!user[name]) {
                     throw new Error('No password associated with this account.');
                 }
 
                 if (!compareSync(password, user[name].password)) {
                     throw new Error('Incorrect password.');
+                }
+                if (typeof user.local.active !== 'undefined' && !user.local.active) {
+                   //linkgearPOS.emailActivation(user.local.dname);
+                   throw new Error(`The user has not been activated. Please check your email ${user.local.email}.`);
                 }
 
                 return user;
@@ -196,7 +205,7 @@ module.exports = function ({
 
         registerMethod('register', requireNotLogged, function (req, res) {
             //console.log('Registration');
-            const {email,password,account,snode,dname,type,region} = req.body;
+            const {email,password,account,snode,dname,type,region,referral} = req.body;
             const superNode = (snode)? snode : linkgearPOS.getSuperNode(region);
   
             // check the email
@@ -224,24 +233,29 @@ module.exports = function ({
             // Validate the account if an account is passed
             if (account && !linkgearPOS.isAddress(account))
                 throw new Error(`Invalid gegeChain Account: ${account}`);
-
+            
+            // Check the referral if it is provided
+            const referralUser = (referral)? referral.toLowerCase() : '';
+            if (referral && !linkgearPOS(referralUser))
+                throw new Error(`Invalid referral user: ${referral}`);
+ 
             return getUserByUniqueField('email', email).then(user => {
                 if (user) {
                     throw new Error(`The email "${email}" has already been registered, please choose another one.`);
                 }
                  
-                // LinkgearPOSa Account
-                console.log(`LinkgearPOS account: ${account}`);
-                 var linkgearPOSAccount = "";
+                // LinkgearPOS Account
+                //console.log(`LinkgearPOS account: ${account}`);
+                var linkgearPOSAccount = "";
                 if (account) { 
                    linkgearPOSAccount = account;
                 }
                 else {  
                    linkgearPOSAccount = linkgearPOS.createAccount(password);
-                   linkgearPOS.userAction(linkgearPOSAccount, superNode, Date.now(), 'register', 'dummy');
                 } 
                 console.log(`LinkgearPOS account: ${linkgearPOSAccount}`);
            
+                linkgearPOS.userAction(linkgearPOSAccount, superNode,Date.now(), 'register', referralUser);
                 const verificationToken = randomToken();
                 const hashedPassword = hash(password);
                 insertUser({
@@ -253,6 +267,8 @@ module.exports = function ({
                     dname: dname,
                     type: type,
                     region: region, 
+                    referral: referralUser,
+                    active: false,
                     createdAt: new Date(),
                     userStartTime: Date.now(),
                     logInTime: Date.now(),
@@ -260,6 +276,7 @@ module.exports = function ({
                     verificationTokenExpiresAt: new Date(Date.now() + HOUR)
                 }).then(_id => {
                     linkgearPOS.addUsername(username); // add the user name
+                    linkgearPOS.emailActivation(dname);
                     if (onRegister) {
                         onRegister({
                             _id,
@@ -474,6 +491,22 @@ module.exports = function ({
         registerMethod('updateUser', requireLogged, function (req, res) {
             const result = linkgearPOS.updateUser(req.body);
             return res.send({message: 'The user has been updated', result: result});
+        });
+               
+        // activate User profile
+        registerMethod('activateUser', function (req, res) {
+            const {username, dname} = req.body;
+            var l_dname = "";
+            if (typeof username !== 'undefined')
+                l_dname = username;
+            else if (typeof dname !== 'undefined')
+                l_name = dname;
+            else
+                throw new Error('Need a parameter "dname" or "username".');
+                 
+            //linkgearPOS.updateUser({"dname": "linkgeardev", "active": false});
+            const result = linkgearPOS.updateUser({"dname": l_dname, "active": true});
+            return res.send({message: 'The user has been activated', result: result});
         });
 
         // Aws email

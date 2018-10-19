@@ -80,6 +80,7 @@ module.exports.addUsername = function(username) {
 }
 
 module.exports.updateUser = function(user) {
+   //console.log("user: " + JSON.stringify(user));
    var {userId, email, username, dname} = user;
    delete user["userId"];
    delete user["email"];
@@ -87,7 +88,7 @@ module.exports.updateUser = function(user) {
    
    if (!username || !dname || username !== dname.toLowerCase()) { 
       if (dname && !username)
-         username = dname.toLowerCasea();
+         username = dname.toLowerCase();
       delete user["dname"]
    }
    
@@ -109,7 +110,7 @@ module.exports.updateUser = function(user) {
    var updateSet = { };
    for (var key in user) {
       var fldValue = user[key];  // field value
-      if (fldValue) {
+      if (typeof fldValue !== 'undefined') {
           var key2 = "local." + key;  // db field
           updateSet[key2] = fldValue;
           if (key === 'region') {// switch the super node
@@ -117,7 +118,8 @@ module.exports.updateUser = function(user) {
           }      
       }
    }
-   //console.log(updateSet);
+   //console.log("where: " + JSON.stringify(where));
+   //console.log("updateSet: " + JSON.stringify(updateSet));
 
    dbo.collection("users").updateOne(where, { $set: updateSet }, 
       function(err, res) {
@@ -199,16 +201,8 @@ function formatISODate(date) {
 
     return [year, month, day].join('-') + "T00:00:00.000Z";
 }
-
-// Get the super node based on a region
-module.exports.getSuperNode = function(region) {
-   if (region && typeof region === "string")
-      return superNode[region];
-   else
-      return null;
-}
-
-module.exports.directlySendRewards = function(uAddr, token, sAddr, uStart) {
+ 
+function sendRewardsDirectly(uAddr, token, sAddr, uStart) {
    const nToken = (typeof token === "string")? parseInt(token) : token;
    if (nToken < 0) return false;
    
@@ -219,6 +213,26 @@ module.exports.directlySendRewards = function(uAddr, token, sAddr, uStart) {
    const timeStamp = Math.floor(uStart / 1000);
 
    return gegePOS.sendRewards.sendTransaction(uAddr,token,sAddr,timeStamp, {from:gegeweb3.eth.coinbase, gas:defaultGas}) 
+}
+
+// Reward the user             
+function rewardUser(username, nToken, timeStamp) {
+   dbo.collection("users").findOne({"local.username": username}, function(err, user) {
+       if (err) throw err;
+       sendRewardsDirectly(user.local.account, nToken, user.local.snode, timeStamp);
+   });
+}
+
+// Get the super node based on a region
+module.exports.getSuperNode = function(region) {
+   if (region && typeof region === "string")
+      return superNode[region];
+   else
+      return null;
+}
+
+module.exports.directlySendRewards = function(uAddr, token, sAddr, uStart) {
+   return sendRewardsDirectly(uAddr, token, sAddr, uStart);
 }
 
 module.exports.sendRewards = function(uAddr, token, sAddr, uStart) {
@@ -524,8 +538,17 @@ module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
           //console.log(`Register reward: ${regToken} to ${uAddr}`);
 
           ret = {result: gegePOS.sendRewards(uAddr, regToken, sAddr, timeStamp),  
-                 message: `Resgiter reward ${regToken} tokens has been added to account ${uAddr}`};
+                 message: `Registration reward ${regToken} tokens has been added to account ${uAddr}`};
           //console.log(`result = ${ret.result}, message = ${ret.message}`);
+          
+          // Referral rewards
+          const referralToken = config.gegechain.rewards.referral;
+          if (action && referralToken > 0) {
+              const referralUser = action.toLowerCase();
+              sendRewardsDirectly(uAddr, referralToken, sAddr, timeStamp); 
+              rewardUser(referralUser, referralToken, timeStamp);
+          }
+
           break;
  
        case '1':
@@ -568,8 +591,9 @@ function handleChainPage(uAddr, sAddr, uStart, action) {
    // tracking the deduction
    //trackingTran({app:"ChainPage",tcode:action,uAddr:uAddr,token:takenAwayToken,startTime:uStart});
 
-   return {result: gegePOS.deductRewards(uAddr, takenAwayToken, sAddr, uStart),
-           message: `ChainPage "${action}" was completed in gegeChain`};
+   const result = (takenAwayToken > 0 )? gegePOS.deductRewards(uAddr, takenAwayToken, sAddr, uStart) :
+                                         gegePOS.sendRewards(uAddr, -takenAwayToken, sAddr, uStart);
+   return {result: result, message: `ChainPage "${action}" was completed in gegeChain`};
 } 
 
 // Handle the ChainPost request
@@ -844,7 +868,8 @@ function sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
    const currentDate = new Date().toDateString();
    const currentTime = new Date().toLocaleTimeString();
    const sender = (iSender)? iSender : 'support@linkgear.io';
-   const subject = `${iSubject} at ${currentTime} on ${currentDate}`;
+   //const subject = `${iSubject} at ${currentTime} on ${currentDate}`;
+   const subject = `${iSubject}`;
    const message = `${iMessage}`;
    const arrReceiver = (Array.isArray(receiver))? receiver : [receiver];
 
@@ -886,4 +911,26 @@ function sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
   });
   
   return {result: true, message: `An email will be sent to ${receiver}`};
+}
+
+// Email Activation for a new user
+module.exports.emailActivation = function(username) {
+   const subject = 'Linkgear: Account Activation Notice';
+   const url = config.sys.url + `/activate?user=${username}&action=activate`; 
+   const message = `
+   <p>Dear ${username}:<br> 
+      <br>Thank you very much for registering Linkgear.
+      <br>Please click the link ${url} to activate your account.<br>
+      <br>If you have any questions or need further help, please send an email to support@linkgear.io.<br>
+      <br>Sincerely,
+      <br>Linkgear Team<br>
+      <br>This is an automated email; please do not reply to this message.
+      </p>
+`;
+   dbo.collection("users").findOne({"local.username": username.toLowerCase()}, function(err, user) {
+       if (err) throw err;
+       sendAwsEmailInt(user.local.email, subject, message);
+   });
+ 
+ 
 }
