@@ -495,17 +495,31 @@ module.exports = function ({
                
         // activate User profile
         registerMethod('activateUser', function (req, res) {
-            const {username, dname} = req.body;
+            const {user, dname, action} = req.body;
             var l_dname = "";
-            if (typeof username !== 'undefined')
-                l_dname = username;
+            if (typeof user !== 'undefined')
+                l_dname = user;
             else if (typeof dname !== 'undefined')
                 l_name = dname;
             else
-                throw new Error('Need a parameter "dname" or "username".');
+                throw new Error('Need a parameter "user" or "dname".');
                  
             //linkgearPOS.updateUser({"dname": "linkgeardev", "active": false});
-            const result = linkgearPOS.updateUser({"dname": l_dname, "active": true});
+            var bAction = true;
+            if (typeof action === 'boolean')
+                bAction = action;
+            else if (typeof action === 'string') {
+                switch (action.toLowerCase()) {
+   		    case 'deactivate':
+                    case 'no':
+                    case 'disable':
+                        bAction = false;
+                    default:
+                        bAction = true;
+                }
+            }
+           
+            const result = linkgearPOS.updateUser({"dname": l_dname, "active": bAction});
             return res.send({message: 'The user has been activated', result: result});
         });
 
