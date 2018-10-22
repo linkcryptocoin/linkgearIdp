@@ -573,16 +573,18 @@ module.exports.userAction = function(uAddr, sAddr, uStart, app, action) {
 
 // Handle the ChainPage request
 function handleChainPage(uAddr, sAddr, uStart, action) {
+    const sign = -1;  // 1: taken-away vs -1: rewards
+    
     var takenAwayToken = 0;
     switch(action) {
        case 'comment':
-          takenAwayToken = 5;
+          takenAwayToken = 5 * sign;
           break;
        case 'like':
-          takenAwayToken = 5;
+          takenAwayToken = 5 * sign;
           break;
        case 'dislike':
-          takenAwayToken = 10;
+          takenAwayToken = 10 * sign;
           breal;
        default: 
           throw `ChainPage: "${action}" not supported`;  

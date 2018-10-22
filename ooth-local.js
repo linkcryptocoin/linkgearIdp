@@ -111,7 +111,7 @@ module.exports = function ({
                    return getUserByUniqueField('email', l_username);
                 } else {
                     if (typeof user.local.active !== 'undefined' && !user.local.active) {
-                       //linkgearPOS.emailActivation(username);  
+                       linkgearPOS.emailActivation(username);  
                        throw new Error(`The user has not been activated. Please check your email ${user.local.email}.`);
                     }
  
@@ -130,7 +130,7 @@ module.exports = function ({
                     throw new Error('Incorrect password.');
                 }
                 if (typeof user.local.active !== 'undefined' && !user.local.active) {
-                   //linkgearPOS.emailActivation(user.local.dname);
+                   linkgearPOS.emailActivation(user.local.dname);
                    throw new Error(`The user has not been activated. Please check your email ${user.local.email}.`);
                 }
 
