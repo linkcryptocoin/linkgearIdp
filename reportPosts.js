@@ -45,18 +45,23 @@ function showPosts(posts, descSorting) {
    console.log(`** Total posts: ${posts.length} **`);
    console.log('***************************************************');
    posts.forEach(function(post) {
-       console.log(`Title   : ${post.Title}`);
-       console.log(`Author  : ${post.postedBy}`);
-       console.log(`Datetime: ${getLocalTime(post.postedTime)}`);
-       //console.log(`Datetime: ${getUtcTime(post.postedTime)} (UTC time)`);
+       console.log(`Posting Title      : ${post.Title}`);
+       console.log(`Author Name        : ${post.postedBy}`);
+       console.log(`Posted Time        : ${getLocalTime(post.postedTime)}`);
+       //console.log(`Posted Time      : ${getUtcTime(post.postedTime)} (UTC time)`);
        console.log(`Number of feedbacks: ${post.comments.length}`);
 
        var likeCount = 0;
+       var dislikeCount = 0;
        post.votes.forEach(function(elem) {
           if (elem.vote === "like")
              likeCount++; 
+          else if (elem.vote === "dislike")
+             dislikeCount++;
        });
        console.log(`Number of likes    : ${likeCount}`);
+       if (dislikeCount > 0)
+          console.log(`Number of dislikes : ${dislikeCount}`);
        console.log('***************************************************');
    });
    console.log(`** Total posts: ${posts.length} **`);
@@ -71,7 +76,7 @@ function getUtcTime(utcTime) {
           (date.getUTCMonth() + 1) + "-" + 
           date.getUTCDate() + " " + 
           date.getUTCHours() + ":" + 
-          date.getUTCMinutes();
+          date.getUTCMinutes().pad();
 }
 
 // Get the local time string for the post
@@ -82,5 +87,14 @@ function getLocalTime(utcTime) {
           (date.getMonth() + 1) + "-" + 
           date.getDate() + " " + 
           date.getHours() + ":" + 
-          date.getMinutes();
+          date.getMinutes().pad();
+}
+
+// Integrate "pad" to Number object
+Number.prototype.pad = function(size) {
+    var str = String(this);
+    while (str.length < (size || 2)) 
+       {str = "0" + str;}
+    
+     return str;
 }
