@@ -537,6 +537,13 @@ module.exports = function ({
             }
         });
         
+        // Aws SMS
+        //
+        registerMethod('t-sendSMS', requireLogged, function (req, res) {
+            const {phone, message} = req.body;
+            return linkgearPOS.sendAwsSMS(phone, message);
+        });
+
         // Link the account - smart contract
         //
         registerMethod('t-add', requireLogged, function (req, res) {
