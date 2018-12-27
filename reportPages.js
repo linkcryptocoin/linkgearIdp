@@ -21,6 +21,7 @@ MongoClient.connect(url, function(err, db) {
    const filter = {};
 
    dbo.collection("listings").find({}, filter).toArray(function(err, posts) {
+   //dbo.collection("listings").find({}, filter).toArray(err => posts => {
        if (err) throw err;
  
        //showPosts(posts);        // show the report in stored order
@@ -37,14 +38,12 @@ function showPosts(posts, descSorting) {
 
    if (typeof descSorting == "boolean") {  
       // Sorting the elements per postedTime - ascending order
-      posts.sort(function(a, b) {
-        return (descSorting)? b.postedTime-a.postedTime: a.postedTime-b.postedTime; 
-      });
+      posts.sort(a => b => (descSorting)? b.postedTime-a.postedTime : a.postedTime-b.postedTime);
    }
            
    console.log(`** Total posts: ${posts.length} **`);
    console.log('***************************************************');
-   posts.forEach(function(post) {
+   posts.forEach(post => {
        console.log(`Name               : ${post.name}`);
        console.log(`Business Name      : ${post.businessName}`);
        console.log(`Street             : ${post.street}`);
@@ -65,7 +64,7 @@ function showPosts(posts, descSorting) {
 
        var likeCount = 0;
        var dislikeCount = 0;
-       post.votes.forEach(function(elem) {
+       post.votes.forEach(elem => { 
           switch (elem.vote) {
              case "like": 
                  likeCount++;
@@ -74,12 +73,11 @@ function showPosts(posts, descSorting) {
                  dislikeCount++;
                  break; 
           }
-           
        });
        console.log(`Number of likes    : ${likeCount}`);
        if (dislikeCount > 0)
-       console.log(`Number of dislikes : ${dislikeCount}`);
-       console.log('***************************************************');
+          console.log(`Number of dislikes : ${dislikeCount}`);
+       console.log('***************************************************')
    });
    console.log(`** Total posts: ${posts.length} **`);
 }
