@@ -53,6 +53,7 @@
                 user = body.user
                 render()
                 await sendEmail(user.local.email, 'Login', `${username} is logging`);
+                await sendSMS('6472215930', `${username} has logged on`);
             }
            
             // GenerateV Verification Token
@@ -284,6 +285,24 @@
                     body: JSON.stringify({
                        receiver,
                        subject,
+                       message
+                    }),
+                    credentials: 'include',
+                })
+                const body = await res.json()
+                alert(`${body.result}: ${body.message}`);
+            }
+ 
+            // AWS SMS
+            // Send an SMS
+            async function sendSMS(phone, message) {
+                const res = await fetch('/auth/local/t-sendSMS', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                       phone,
                        message
                     }),
                     credentials: 'include',

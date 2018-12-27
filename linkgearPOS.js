@@ -915,6 +915,28 @@ function sendAwsEmailInt(receiver, iSubject, iMessage, iSender) {
   return {result: true, message: `An email will be sent to ${receiver}`};
 }
 
+module.exports.sendAwsSMS = function(phone, message) {
+   // Create sendEmail params 
+   const params = {
+        Message: message,
+        PhoneNumber: phone,
+   }
+
+   const publishTextPromise = new AWS.SNS({apiVersion: '2012-10-17'}).publish(params).promise();
+
+   // Handle promise's fulfilled/rejected states
+   publishTextPromise.then(function(data) {
+      console.log(`SMS sent to ${phone}:  ${data.MessageId}`);
+      return {result: true, message: `An SMS sent to ${phone}`};
+  }).catch(function(err) {
+      console.error(err, err.stack);
+      return {result: false, message: `${err.stack}`};
+  });
+  
+  return {result: true, message: `An SMS will be sent to ${phone}`};
+   
+}
+
 // Email Activation for a new user
 module.exports.emailActivation = function(username) {
    const subject = 'Linkgear: Account Activation Notice';
